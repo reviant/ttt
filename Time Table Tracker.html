@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Updated Viewport for App-like feel (prevents zooming) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Mobile Web App Settings -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#f0f2f5">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <title>Mastery Tracker Pro</title>
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel Export (Standard CDN) -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --primary: #3498db;
+            --dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+            /* Prevent pull-to-refresh on mobile to feel more like an app */
+            overscroll-behavior-y: contain; 
+        }
+
+        h1 { text-align: center; color: var(--dark); margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #777; margin-bottom: 25px; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* --- MONTHLY STATS --- */
+        .stats-container {
+            text-align: center;
+        }
+        .stats-title {
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .stats-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        /* --- YEARLY OVERVIEW GRID --- */
+        .yearly-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .yearly-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 months per row */
+            gap: 10px;
+        }
+        .month-box {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #eee; /* Slightly thicker border for selection visibility */
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .month-box:hover {
+            background: #eee;
+            transform: translateY(-2px);
+        }
+        .month-box.selected-month {
+            border-color: var(--primary);
+            background: #ebf5fb;
+        }
+        .month-name { font-size: 12px; color: #666; font-weight: bold; margin-bottom: 4px; }
+        .month-score { font-size: 16px; font-weight: bold; color: #333; }
+        .month-box.has-data { border-color: #ddd; }
+        /* When selected, override the has-data border */
+        .month-box.has-data.selected-month { border-color: var(--primary); }
+
+        /* Year Selector */
+        #yearSelect {
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--dark);
+            cursor: pointer;
+        }
+
+        /* --- GRAPH SECTION --- */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        /* --- HABIT GRID --- */
+        .habit-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columns */
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .habit-btn {
+            padding: 15px;
+            border: 2px solid #eee;
+            background: #fff; /* Fallback */
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #777;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;    
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden; /* For progress bar containment */
+            /* Better touch target for mobile */
+            min-height: 80px; 
+        }
+
+        /* Active State (Border/Text) */
+        .habit-btn.active {
+            border-color: var(--success);
+            color: var(--success);
+            /* Background set dynamically via JS */
+        }
+        
+        /* Locked State (Read Only) */
+        .habit-btn.locked, .mode-btn.locked {
+            opacity: 0.6;
+            cursor: not-allowed !important;
+            filter: grayscale(0.2);
+        }
+        
+        /* Specific styles for No D / No P */
+        .habit-btn[data-habit="noD"], .habit-btn[data-habit="noP"] {
+            border-color: #ffe0e0;
+        }
+        .habit-btn.active[data-habit="noD"], .habit-btn.active[data-habit="noP"] {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        /* --- STUDY MODES --- */
+        .mode-container { display: flex; gap: 8px; margin-top: 10px; }
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.8; /* Slightly readable if background is light */
+            transition: 0.2s;
+            text-align: center;
+            background: #f0f0f0; /* Fallback */
+            color: #555;
+            min-height: 70px; /* Better touch target */
+        }
+        
+        .mode-btn.selected { 
+            transform: scale(1.02); 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            color: #000;
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+        
+        .mode-btn.red.selected { color: #8a1c1c; border-color: var(--danger); }
+        .mode-btn.yellow.selected { color: #755f00; border-color: var(--warning); }
+        .mode-btn.green.selected { color: #145e32; border-color: var(--success); }
+
+
+        /* --- FORM CONTROLS --- */
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box; 
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .export-btn:hover { background-color: #219150; }
+
+        .reset-btn-year {
+            font-size: 12px;
+            color: #e74c3c;
+            background: none;
+            border: 1px solid #e74c3c;
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .reset-btn-year:hover { background: #fff0f0; }
+
+        /* --- STATUS INDICATOR --- */
+        #status-indicator {
+            text-align: right;
+            font-size: 12px;
+            color: var(--success);
+            font-weight: bold;
+            height: 20px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .btn-count {
+            display: block;
+            font-size: 11px;
+            opacity: 0.8;
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        /* --- SCORE PILL (UPDATED) --- */
+        .score-pill {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            min-width: 45px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 Self Mastery</h1>
+    <div class="subtitle">Track Habits, Study, and Discipline</div>
+
+    <!-- Task Input Box -->
+    <div class="card">
+        <label style="display:block; margin-bottom:10px; font-weight:bold;">Select Date (Edit)</label>
+        <input type="date" id="dateInput">
+
+        <div style="margin-top: 25px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label style="font-weight:bold;">
+                    Study Mode 
+                    <span id="totalStudyCount" style="font-weight:normal; font-size:0.85em; color:#666; margin-left:8px;">(Total: 0 days)</span>
+                </label>
+                <div id="status-indicator">✅ Saved</div>
+            </div>
+            
+            <div class="mode-container">
+                <button class="mode-btn red" onclick="setStudyMode('red')" id="btn-mode-red">
+                    RED<br><small>GK Only</small>
+                </button>
+                <button class="mode-btn yellow" onclick="setStudyMode('yellow')" id="btn-mode-yellow">
+                    YELLOW<br><small>Concept</small>
+                </button>
+                <button class="mode-btn green" onclick="setStudyMode('green')" id="btn-mode-green">
+                    GREEN<br><small>Deep Work</small>
+                </button>
+            </div>
+        </div>
+
+        <div style="margin-top: 25px;">
+            <label style="font-weight:bold;">Daily Habits</label>
+            <div class="habit-grid">
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="wakeUp">🌅 Wake Up</button>
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="exercise">💪 Exercise</button>
+                
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="meditation">🧘 Meditation</button>
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="prayer">🙏 Prayer</button>
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="walk">🚶 Walk</button>
+                
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="reading">📚 Reading</button>
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="skills">💻 Skills/Code</button>
+                
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="noD">🛡️ No D</button>
+                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="noP">🛡️ No P</button>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:15px; font-size:12px; color:#999;">
+            Changes are saved automatically
+        </div>
+    </div>
+
+    <!-- Monthly Stats Card -->
+    <div class="card">
+        <div class="stats-container">
+            <div class="stats-title">Average Score for <span id="currentMonthName">--</span></div>
+            <div id="monthlyScoreValue" class="stats-value">--</div>
+        </div>
+    </div>
+
+    <!-- Yearly Overview Card -->
+    <div class="card">
+        <div class="yearly-header">
+            <h3>Yearly Overview</h3>
+            <select id="yearSelect" onchange="changeViewYear(this.value)"></select>
+        </div>
+        <div id="yearlyStatsGrid" class="yearly-grid">
+            <!-- Grid generated by JS -->
+        </div>
+    </div>
+
+    <!-- Progress Graph -->
+    <div class="card">
+        <h3>Progress Graph (Daily Score %)</h3>
+        <div class="chart-container">
+            <canvas id="progressChart"></canvas>
+        </div>
+    </div>
+
+    <!-- History Log -->
+    <div class="card">
+        <h3 id="historyLogTitle">History Log</h3>
+        <table id="historyTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Score</th>
+                    <th>Study</th>
+                    <th>Habits</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        
+        <div style="text-align:center; margin-top:30px; display:flex; flex-direction:column; gap:10px; align-items:center;">
+            <!-- Removed Backup/Restore Controls -->
+            <button onclick="exportToExcel()" class="export-btn">📥 Export to Excel</button>
+            <div style="border-top: 1px solid #eee; width: 100%; margin: 10px 0;"></div>
+            <!-- Removed Fill Random Data button -->
+            <button onclick="clearPreviousYears()" class="reset-btn-year">🗑️ Clear Previous Years Data</button>
+            <button onclick="clearData()" style="color:#aaa; background:none; border:none; cursor:pointer; font-size:12px;">Reset All Data</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const habitsList = ['wakeUp', 'exercise', 'meditation', 'prayer', 'walk', 'reading', 'skills', 'noD', 'noP'];
+        
+        const habitLabels = {
+            'wakeUp': '🌅 Wake Up',
+            'exercise': '💪 Exercise',
+            'meditation': '🧘 Meditation',
+            'prayer': '🙏 Prayer',
+            'walk': '🚶 Walk',
+            'reading': '📚 Reading',
+            'skills': '💻 Skills/Code',
+            'noD': '🛡️ No D',
+            'noP': '🛡️ No P'
+        };
+
+        const studyLabels = {
+            'red': 'GK Only',
+            'yellow': 'Concept',
+            'green': 'Deep Work'
+        };
+
+        let currentData = {};
+        let myChart = null;
+
+        // View State State variables
+        let viewYear = new Date().getFullYear();
+        let viewMonth = new Date().getMonth(); // 0-11
+
+        // --- INITIALIZATION ---
+        const dateInput = document.getElementById('dateInput');
+        dateInput.valueAsDate = new Date();
+        
+        initYearSelector();
+        loadDateData(); 
+
+        dateInput.addEventListener('change', () => {
+            // When user changes edit date, sync the view to that date
+            const d = new Date(dateInput.value);
+            viewYear = d.getFullYear();
+            viewMonth = d.getMonth();
+            document.getElementById('yearSelect').value = viewYear;
+            loadDateData(); 
+        });
+
+        // --- YEAR SELECTOR INIT ---
+        function initYearSelector() {
+            const select = document.getElementById('yearSelect');
+            const currentY = new Date().getFullYear();
+            // Allow range from 5 years ago to next year
+            for (let y = currentY - 5; y <= currentY + 1; y++) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.text = y;
+                if (y === viewYear) opt.selected = true;
+                select.appendChild(opt);
+            }
+        }
+
+        function changeViewYear(val) {
+            viewYear = parseInt(val);
+            // Don't reset viewMonth unless you want to default to Jan
+            // But we do need to reload the stats/graphs for the new year
+            renderHistoryAndGraph(); 
+        }
+
+        function changeViewMonth(monthIndex) {
+            viewMonth = monthIndex;
+            renderHistoryAndGraph();
+        }
+
+        // --- HELPER: CHECK IF DATE IS READ ONLY (PAST MONTH) ---
+        function isDateReadOnly(dateStr) {
+            if(!dateStr) return false;
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const selDate = new Date(y, m - 1, d);
+            const today = new Date();
+            
+            // Check if selected year/month is strictly before today's year/month
+            const selYear = selDate.getFullYear();
+            const selMonth = selDate.getMonth();
+            
+            const curYear = today.getFullYear();
+            const curMonth = today.getMonth();
+            
+            // If year is previous, it's read only
+            if (selYear < curYear) return true;
+            // If year is same but month is previous, it's read only
+            if (selYear === curYear && selMonth < curMonth) return true;
+            
+            return false;
+        }
+
+        // --- DATA LOADING & RESTORATION ---
+        function loadDateData() {
+            const date = dateInput.value;
+            const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
+            
+            if (allHistory[date]) {
+                currentData = allHistory[date];
+            } else {
+                currentData = {};
+                habitsList.forEach(h => currentData[h] = false);
+                currentData['studyMode'] = null;
+                currentData['score'] = 0;
+            }
+
+            updateUIState();
+            renderHistoryAndGraph(); // Use current viewYear/viewMonth
+        }
+
+        function updateUIState() {
+            // Check if Locked
+            const isLocked = isDateReadOnly(dateInput.value);
+            const statusInd = document.getElementById('status-indicator');
+
+            // Update Status Indicator visual
+            if (isLocked) {
+                statusInd.innerHTML = "🔒 Locked (Past Month)";
+                statusInd.style.opacity = '1';
+                statusInd.style.color = '#7f8c8d'; 
+            } else {
+                statusInd.innerHTML = "✅ Saved";
+                statusInd.style.opacity = '0'; // Hide until save trigger
+                statusInd.style.color = 'var(--success)';
+            }
+
+            // Update Habit Buttons
+            document.querySelectorAll('.habit-btn').forEach(btn => {
+                const habitKey = btn.getAttribute('data-habit');
+                
+                // Active State
+                if (currentData[habitKey]) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+
+                // Locked State
+                if (isLocked) {
+                    btn.classList.add('locked');
+                } else {
+                    btn.classList.remove('locked');
+                }
+            });
+
+            // Update Mode buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                
+                if (isLocked) {
+                    btn.classList.add('locked');
+                } else {
+                    btn.classList.remove('locked');
+                }
+            });
+
+            if (currentData.studyMode && currentData.studyMode !== 'none') {
+                const activeBtn = document.querySelector(`.mode-btn.${currentData.studyMode}`);
+                if (activeBtn) activeBtn.classList.add('selected');
+            }
+        }
+
+        // --- INTERACTION ---
+        function toggleHabit(btn) {
+            // Prevent editing if locked
+            if (isDateReadOnly(dateInput.value)) return;
+
+            btn.classList.toggle('active');
+            const habitKey = btn.getAttribute('data-habit');
+            currentData[habitKey] = btn.classList.contains('active');
+            autoSave(); 
+        }
+
+        function setStudyMode(mode) {
+            // Prevent editing if locked
+            if (isDateReadOnly(dateInput.value)) return;
+
+            if (currentData['studyMode'] === mode) {
+                currentData['studyMode'] = null;
+            } else {
+                currentData['studyMode'] = mode;
+            }
+            updateUIState();
+            autoSave(); 
+        }
+
+        // --- CORE LOGIC ---
+        function autoSave() {
+            const date = dateInput.value;
+            // Guard clause just in case
+            if (isDateReadOnly(date)) return;
+
+            if(!currentData['studyMode']) currentData['studyMode'] = 'none';
+
+            let points = 0;
+            habitsList.forEach(h => { if(currentData[h]) points++; });
+            
+            if(currentData.studyMode === 'green') points += 1;
+            else if(currentData.studyMode === 'yellow') points += 1;
+            else if(currentData.studyMode === 'red') points += 1; 
+
+            const score = Math.round((points / 10) * 100);
+            currentData['score'] = score;
+
+            let allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
+            allHistory[date] = currentData;
+            localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
+
+            renderHistoryAndGraph();
+            showSavedIndicator();
+        }
+
+        function showSavedIndicator() {
+            const el = document.getElementById('status-indicator');
+            el.style.opacity = '1';
+            setTimeout(() => { el.style.opacity = '0'; }, 1500);
+        }
+
+        // --- RENDERING ---
+        function renderHistoryAndGraph() {
+            const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
+            
+            // Filter keys for the CURRENT VIEW (Year + Month)
+            // This is used for Graph and History Table
+            const filteredDates = Object.keys(allHistory).filter(dateStr => {
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return y === viewYear && (m - 1) === viewMonth;
+            }).sort();
+
+            updateChart(filteredDates, allHistory);
+            updateHistoryTable(filteredDates, allHistory);
+            
+            // These depend on specific contexts:
+            updateMonthlyStats(allHistory); // Uses viewYear/viewMonth
+            updateYearlyStats(allHistory);  // Uses viewYear
+            updateMonthlyCounts(allHistory); // Uses viewYear/viewMonth
+
+            // Update History Log Title
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('historyLogTitle').innerText = `History Log (${monthNames[viewMonth]} ${viewYear})`;
+        }
+
+        // --- NEW: UPDATE BUTTONS WITH PROGRESS BARS ---
+        function updateMonthlyCounts(allHistory) {
+            // NOTE: This calculates based on viewYear/viewMonth, so users see stats for the month they selected
+            const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+            const monthDates = Object.keys(allHistory).filter(dateStr => {
+                const [y, m, dNum] = dateStr.split('-').map(Number);
+                return y === viewYear && (m - 1) === viewMonth;
+            });
+
+            // Counters
+            let habitCounts = {};
+            habitsList.forEach(h => habitCounts[h] = 0);
+            let studyCounts = { red: 0, yellow: 0, green: 0, total: 0 };
+
+            // Tally
+            monthDates.forEach(date => {
+                const day = allHistory[date];
+                habitsList.forEach(h => { if (day[h]) habitCounts[h]++; });
+                if (day.studyMode && day.studyMode !== 'none') {
+                    studyCounts.total++;
+                    if (studyCounts[day.studyMode] !== undefined) {
+                        studyCounts[day.studyMode]++;
+                    }
+                }
+            });
+
+            // Update Habit Buttons
+            document.querySelectorAll('.habit-btn').forEach(btn => {
+                const hKey = btn.getAttribute('data-habit');
+                const count = habitCounts[hKey];
+                const pct = Math.round((count / daysInMonth) * 100);
+                const label = habitLabels[hKey];
+                
+                // Active state is based on CURRENT EDIT DATE (currentData), not the month view
+                const isActive = currentData[hKey];
+
+                // Text
+                btn.innerHTML = `${label}<span class="btn-count">${count} days (${pct}%)</span>`;
+
+                let colorFilled, colorEmpty;
+                if (isActive) {
+                    colorFilled = '#bbf7d0'; 
+                    colorEmpty = '#e8f8f0';  
+                } else {
+                    colorFilled = '#dcfce7'; 
+                    colorEmpty = '#ffffff';  
+                }
+
+                btn.style.background = `linear-gradient(90deg, ${colorFilled} ${pct}%, ${colorEmpty} ${pct}%)`;
+            });
+
+            // Update Study Mode Buttons
+            ['red', 'yellow', 'green'].forEach(mode => {
+                const btn = document.getElementById(`btn-mode-${mode}`);
+                const count = studyCounts[mode];
+                const pct = Math.round((count / daysInMonth) * 100);
+                const label = studyLabels[mode];
+                const btnTitle = mode.toUpperCase();
+                const isSelected = (currentData.studyMode === mode);
+
+                let colorFilled, colorEmpty;
+                if (mode === 'red') {
+                    colorFilled = isSelected ? '#fecaca' : '#fee2e2'; 
+                    colorEmpty = isSelected ? '#fff1f2' : '#ffffff';
+                } else if (mode === 'yellow') {
+                    colorFilled = isSelected ? '#fde047' : '#fef9c3'; 
+                    colorEmpty = isSelected ? '#fefce8' : '#ffffff';
+                } else { 
+                    colorFilled = isSelected ? '#bbf7d0' : '#dcfce7'; 
+                    colorEmpty = isSelected ? '#f0fdf4' : '#ffffff';
+                }
+
+                btn.innerHTML = `${btnTitle}<br><small>${label} • ${count}d (${pct}%)</small>`;
+                btn.style.background = `linear-gradient(90deg, ${colorFilled} ${pct}%, ${colorEmpty} ${pct}%)`;
+            });
+
+            document.getElementById('totalStudyCount').innerText = `(Total: ${studyCounts.total} days)`;
+        }
+
+        function updateMonthlyStats(allHistory) {
+            // Use viewYear/viewMonth
+            const monthName = new Date(viewYear, viewMonth).toLocaleString('default', { month: 'long' });
+            document.getElementById('currentMonthName').innerText = `${monthName} ${viewYear}`;
+
+            const monthDates = Object.keys(allHistory).filter(dateStr => {
+                const [y, m, dNum] = dateStr.split('-').map(Number);
+                return y === viewYear && (m - 1) === viewMonth;
+            });
+
+            const valEl = document.getElementById('monthlyScoreValue');
+            if (monthDates.length === 0) {
+                valEl.innerText = "--";
+                valEl.style.color = "#ccc";
+                return;
+            }
+
+            const totalScore = monthDates.reduce((sum, date) => sum + (allHistory[date].score || 0), 0);
+            
+            // NEW: Divide by total days in the month (e.g. 30 or 31)
+            const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+            const avgScore = Math.round(totalScore / daysInMonth);
+
+            valEl.innerText = avgScore + "%";
+            if(avgScore >= 80) valEl.style.color = 'var(--success)';
+            else if(avgScore >= 50) valEl.style.color = 'var(--warning)';
+            else valEl.style.color = 'var(--danger)';
+        }
+
+        function updateYearlyStats(allHistory) {
+            // Use viewYear
+            const container = document.getElementById('yearlyStatsGrid');
+            container.innerHTML = '';
+
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            monthNames.forEach((month, index) => {
+                const monthDates = Object.keys(allHistory).filter(dateStr => {
+                    const [y, m, dNum] = dateStr.split('-').map(Number);
+                    return y === viewYear && (m - 1) === index;
+                });
+
+                let displayScore = "-";
+                let colorStyle = "#ccc";
+                let boxClass = "month-box";
+                
+                // Highlight Selected Month
+                if (index === viewMonth) {
+                    boxClass += " selected-month";
+                }
+
+                if (monthDates.length > 0) {
+                    const total = monthDates.reduce((sum, d) => sum + (allHistory[d].score || 0), 0);
+                    
+                    // NEW: Divide by total days in the month
+                    const daysInThisMonth = new Date(viewYear, index + 1, 0).getDate();
+                    const avg = Math.round(total / daysInThisMonth);
+                    
+                    displayScore = avg + "%";
+                    boxClass += " has-data";
+                    
+                    if (avg >= 80) colorStyle = 'var(--success)';
+                    else if (avg >= 50) colorStyle = 'var(--warning)';
+                    else colorStyle = 'var(--danger)';
+                }
+
+                container.innerHTML += `
+                    <div class="${boxClass}" onclick="changeViewMonth(${index})">
+                        <div class="month-name">${month}</div>
+                        <div class="month-score" style="color: ${colorStyle}">${displayScore}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateHistoryTable(dates, allHistory) {
+            const tbody = document.querySelector('#historyTable tbody');
+            tbody.innerHTML = '';
+            
+            // "dates" is already filtered for the viewMonth
+            [...dates].reverse().forEach(date => {
+                const day = allHistory[date];
+                if (day.score === 0 && !day.studyMode && habitsList.every(h => !day[h])) return;
+
+                let scoreColor = '#e74c3c';
+                if(day.score >= 50) scoreColor = '#f1c40f';
+                if(day.score >= 80) scoreColor = '#2ecc71';
+
+                // Format Date as DD-MM-YY
+                const [y, m, d] = date.split('-');
+                const formattedDate = `${d}-${m}-${y.slice(2)}`;
+
+                const row = `
+                    <tr>
+                        <td><strong>${formattedDate}</strong></td>
+                        <td><span class="score-pill" style="background:${scoreColor}">${day.score}%</span></td>
+                        <td>${day.studyMode && day.studyMode !== 'none' ? day.studyMode.toUpperCase() : '-'}</td>
+                        <td style="font-size:10px; color:#666;">
+                            ${day.wakeUp ? '🌅 ' : ''}
+                            ${day.exercise ? '💪 ' : ''}
+                            ${day.meditation ? '🧘 ' : ''}
+                            ${day.prayer ? '🙏 ' : ''}
+                            ${day.walk ? '🚶 ' : ''}
+                            ${day.reading ? '📚 ' : ''}
+                            ${day.skills ? '💻 ' : ''}
+                            ${day.noD ? '🛡️D ' : ''}
+                            ${day.noP ? '🛡️P ' : ''}
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function updateChart(dates, allHistory) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            // "dates" is already filtered for the viewMonth
+            const scores = dates.map(d => allHistory[d].score || 0);
+
+            if(myChart) myChart.destroy();
+
+            // Create Gradient
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(52, 152, 219, 0.5)'); // Top color
+            gradient.addColorStop(1, 'rgba(52, 152, 219, 0.0)'); // Bottom transparent
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.map(d => d.slice(5)), // Show MM-DD
+                    datasets: [{
+                        label: 'Mastery Score',
+                        data: scores,
+                        borderColor: '#3498db',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#3498db',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.4 // Smoother curve
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                font: { family: "'Segoe UI', sans-serif" }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: "'Segoe UI', sans-serif" },
+                                maxTicksLimit: 10 // Avoid clutter
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(44, 62, 80, 0.9)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: { size: 14, family: "'Segoe UI', sans-serif" },
+                            bodyFont: { size: 14, family: "'Segoe UI', sans-serif" },
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Score: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportToExcel() {
+            if (typeof XLSX === 'undefined') {
+                alert('Excel library (SheetJS) is loading. Please try again in a moment.');
+                return;
+            }
+
+            const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
+            const dates = Object.keys(allHistory).sort();
+
+            if (dates.length === 0) {
+                alert("No data to export!");
+                return;
+            }
+
+            try {
+                const data = dates.map(date => {
+                    const entry = allHistory[date];
+                    return {
+                        "Date": date,
+                        "Score": entry.score,
+                        "Study Mode": entry.studyMode,
+                        "Wake Up": entry.wakeUp ? 'Yes' : '',
+                        "Exercise": entry.exercise ? 'Yes' : '',
+                        "Meditation": entry.meditation ? 'Yes' : '',
+                        "Prayer": entry.prayer ? 'Yes' : '',
+                        "Walk": entry.walk ? 'Yes' : '',
+                        "Reading": entry.reading ? 'Yes' : '',
+                        "Skills": entry.skills ? 'Yes' : '',
+                        "No D": entry.noD ? 'Yes' : '',
+                        "No P": entry.noP ? 'Yes' : ''
+                    };
+                });
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wscols = [{wch:12}, {wch:8}, {wch:10}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}];
+                ws['!cols'] = wscols;
+
+                XLSX.utils.book_append_sheet(wb, ws, "Mastery Data");
+                XLSX.writeFile(wb, `Mastery_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+            } catch (e) {
+                alert("Export failed. Please try opening this file in a real browser.");
+            }
+        }
+
+        function clearPreviousYears() {
+            const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
+            const currentYear = new Date().getFullYear();
+            
+            const keysToDelete = Object.keys(allHistory).filter(dateStr => {
+                const year = parseInt(dateStr.split('-')[0]);
+                return year < currentYear;
+            });
+
+            if (keysToDelete.length === 0) {
+                alert(`No data found from years before ${currentYear}.`);
+                return;
+            }
+
+            if(confirm(`Are you sure you want to delete ${keysToDelete.length} records from before ${currentYear}? This cannot be undone.`)) {
+                keysToDelete.forEach(key => delete allHistory[key]);
+                localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
+                alert("Previous years' data has been cleared.");
+                loadDateData(); 
+            }
+        }
+
+        function clearData() {
+            if(confirm("Permanently delete ALL history (including this year)? This cannot be undone.")) {
+                localStorage.removeItem('masteryTracker_v2');
+                currentData = {};
+                habitsList.forEach(h => currentData[h] = false);
+                currentData['studyMode'] = null;
+                currentData['score'] = 0;
+                updateUIState();
+                renderHistoryAndGraph(); 
+                document.getElementById('monthlyScoreValue').innerText = "--";
+                document.getElementById('monthlyScoreValue').style.color = "#ccc";
+                alert("All data has been reset.");
+            }
+        }
+    </script>
+</body>
+</html>
