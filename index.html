@@ -239,6 +239,19 @@
         }
         .export-btn:hover { background-color: #219150; }
 
+        .restore-btn {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .restore-btn:hover { background-color: #2980b9; }
+
         .reset-btn-year {
             font-size: 12px;
             color: #e74c3c;
@@ -282,6 +295,79 @@
             min-width: 45px;
             text-align: center;
             border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* --- CUSTOM MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        .modal-message {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 80px;
+        }
+        .modal-btn-cancel {
+            background: #f1f2f6;
+            color: #747d8c;
+        }
+        .modal-btn-confirm {
+            background: var(--primary);
+            color: white;
+        }
+        .modal-btn-confirm.danger {
+            background: var(--danger);
         }
     </style>
 </head>
@@ -382,12 +468,27 @@
         </table>
         
         <div style="text-align:center; margin-top:30px; display:flex; flex-direction:column; gap:10px; align-items:center;">
-            <!-- Removed Backup/Restore Controls -->
             <button onclick="exportToExcel()" class="export-btn">📥 Export to Excel</button>
+            
+            <!-- Restore Button & Hidden Input -->
+            <input type="file" id="restoreInput" style="display:none" accept=".xlsx, .xls" onchange="importFromExcel(this)">
+            <button onclick="document.getElementById('restoreInput').click()" class="restore-btn">📤 Restore from Excel</button>
+            
             <div style="border-top: 1px solid #eee; width: 100%; margin: 10px 0;"></div>
-            <!-- Removed Fill Random Data button -->
             <button onclick="clearPreviousYears()" class="reset-btn-year">🗑️ Clear Previous Years Data</button>
             <button onclick="clearData()" style="color:#aaa; background:none; border:none; cursor:pointer; font-size:12px;">Reset All Data</button>
+        </div>
+    </div>
+
+    <!-- CUSTOM MODAL UI -->
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modal-title" class="modal-title">Notification</div>
+            <div id="modal-message" class="modal-message"></div>
+            <div class="modal-buttons">
+                <button id="modal-btn-cancel" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button id="modal-btn-confirm" class="modal-btn modal-btn-confirm">OK</button>
+            </div>
         </div>
     </div>
 
@@ -452,8 +553,6 @@
 
         function changeViewYear(val) {
             viewYear = parseInt(val);
-            // Don't reset viewMonth unless you want to default to Jan
-            // But we do need to reload the stats/graphs for the new year
             renderHistoryAndGraph(); 
         }
 
@@ -469,19 +568,60 @@
             const selDate = new Date(y, m - 1, d);
             const today = new Date();
             
-            // Check if selected year/month is strictly before today's year/month
             const selYear = selDate.getFullYear();
             const selMonth = selDate.getMonth();
             
             const curYear = today.getFullYear();
             const curMonth = today.getMonth();
             
-            // If year is previous, it's read only
             if (selYear < curYear) return true;
-            // If year is same but month is previous, it's read only
             if (selYear === curYear && selMonth < curMonth) return true;
             
             return false;
+        }
+
+        // --- MODAL UTILS ---
+        function showModal(message, type = 'alert', onConfirm = null) {
+            const modal = document.getElementById('custom-modal');
+            const titleEl = document.getElementById('modal-title');
+            const msgEl = document.getElementById('modal-message');
+            const cancelBtn = document.getElementById('modal-btn-cancel');
+            const confirmBtn = document.getElementById('modal-btn-confirm');
+
+            msgEl.textContent = message;
+
+            // Reset styles
+            confirmBtn.classList.remove('danger');
+            confirmBtn.textContent = "OK";
+            
+            // Clean previous listeners to avoid stacking
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+            const closeModal = () => modal.classList.remove('active');
+
+            newCancelBtn.onclick = closeModal;
+
+            if (type === 'confirm') {
+                titleEl.textContent = 'Confirmation Needed';
+                cancelBtn.style.display = 'block';
+                newConfirmBtn.textContent = 'Yes, Delete';
+                newConfirmBtn.classList.add('danger');
+                
+                newConfirmBtn.onclick = () => {
+                    closeModal();
+                    if(onConfirm) onConfirm();
+                };
+            } else {
+                titleEl.textContent = 'Notice';
+                cancelBtn.style.display = 'none';
+                newConfirmBtn.onclick = closeModal;
+            }
+
+            modal.classList.add('active');
         }
 
         // --- DATA LOADING & RESTORATION ---
@@ -499,53 +639,36 @@
             }
 
             updateUIState();
-            renderHistoryAndGraph(); // Use current viewYear/viewMonth
+            renderHistoryAndGraph(); 
         }
 
         function updateUIState() {
-            // Check if Locked
             const isLocked = isDateReadOnly(dateInput.value);
             const statusInd = document.getElementById('status-indicator');
 
-            // Update Status Indicator visual
             if (isLocked) {
                 statusInd.innerHTML = "🔒 Locked (Past Month)";
                 statusInd.style.opacity = '1';
                 statusInd.style.color = '#7f8c8d'; 
             } else {
                 statusInd.innerHTML = "✅ Saved";
-                statusInd.style.opacity = '0'; // Hide until save trigger
+                statusInd.style.opacity = '0'; 
                 statusInd.style.color = 'var(--success)';
             }
 
-            // Update Habit Buttons
             document.querySelectorAll('.habit-btn').forEach(btn => {
                 const habitKey = btn.getAttribute('data-habit');
-                
-                // Active State
-                if (currentData[habitKey]) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                if (currentData[habitKey]) btn.classList.add('active');
+                else btn.classList.remove('active');
 
-                // Locked State
-                if (isLocked) {
-                    btn.classList.add('locked');
-                } else {
-                    btn.classList.remove('locked');
-                }
+                if (isLocked) btn.classList.add('locked');
+                else btn.classList.remove('locked');
             });
 
-            // Update Mode buttons
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.classList.remove('selected');
-                
-                if (isLocked) {
-                    btn.classList.add('locked');
-                } else {
-                    btn.classList.remove('locked');
-                }
+                if (isLocked) btn.classList.add('locked');
+                else btn.classList.remove('locked');
             });
 
             if (currentData.studyMode && currentData.studyMode !== 'none') {
@@ -556,7 +679,6 @@
 
         // --- INTERACTION ---
         function toggleHabit(btn) {
-            // Prevent editing if locked
             if (isDateReadOnly(dateInput.value)) return;
 
             btn.classList.toggle('active');
@@ -566,7 +688,6 @@
         }
 
         function setStudyMode(mode) {
-            // Prevent editing if locked
             if (isDateReadOnly(dateInput.value)) return;
 
             if (currentData['studyMode'] === mode) {
@@ -581,7 +702,6 @@
         // --- CORE LOGIC ---
         function autoSave() {
             const date = dateInput.value;
-            // Guard clause just in case
             if (isDateReadOnly(date)) return;
 
             if(!currentData['studyMode']) currentData['studyMode'] = 'none';
@@ -614,8 +734,6 @@
         function renderHistoryAndGraph() {
             const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
             
-            // Filter keys for the CURRENT VIEW (Year + Month)
-            // This is used for Graph and History Table
             const filteredDates = Object.keys(allHistory).filter(dateStr => {
                 const [y, m, d] = dateStr.split('-').map(Number);
                 return y === viewYear && (m - 1) === viewMonth;
@@ -624,19 +742,15 @@
             updateChart(filteredDates, allHistory);
             updateHistoryTable(filteredDates, allHistory);
             
-            // These depend on specific contexts:
-            updateMonthlyStats(allHistory); // Uses viewYear/viewMonth
-            updateYearlyStats(allHistory);  // Uses viewYear
-            updateMonthlyCounts(allHistory); // Uses viewYear/viewMonth
+            updateMonthlyStats(allHistory); 
+            updateYearlyStats(allHistory);  
+            updateMonthlyCounts(allHistory); 
 
-            // Update History Log Title
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             document.getElementById('historyLogTitle').innerText = `History Log (${monthNames[viewMonth]} ${viewYear})`;
         }
 
-        // --- NEW: UPDATE BUTTONS WITH PROGRESS BARS ---
         function updateMonthlyCounts(allHistory) {
-            // NOTE: This calculates based on viewYear/viewMonth, so users see stats for the month they selected
             const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
 
             const monthDates = Object.keys(allHistory).filter(dateStr => {
@@ -644,12 +758,10 @@
                 return y === viewYear && (m - 1) === viewMonth;
             });
 
-            // Counters
             let habitCounts = {};
             habitsList.forEach(h => habitCounts[h] = 0);
             let studyCounts = { red: 0, yellow: 0, green: 0, total: 0 };
 
-            // Tally
             monthDates.forEach(date => {
                 const day = allHistory[date];
                 habitsList.forEach(h => { if (day[h]) habitCounts[h]++; });
@@ -661,17 +773,14 @@
                 }
             });
 
-            // Update Habit Buttons
             document.querySelectorAll('.habit-btn').forEach(btn => {
                 const hKey = btn.getAttribute('data-habit');
                 const count = habitCounts[hKey];
                 const pct = Math.round((count / daysInMonth) * 100);
                 const label = habitLabels[hKey];
                 
-                // Active state is based on CURRENT EDIT DATE (currentData), not the month view
                 const isActive = currentData[hKey];
 
-                // Text
                 btn.innerHTML = `${label}<span class="btn-count">${count} days (${pct}%)</span>`;
 
                 let colorFilled, colorEmpty;
@@ -686,7 +795,6 @@
                 btn.style.background = `linear-gradient(90deg, ${colorFilled} ${pct}%, ${colorEmpty} ${pct}%)`;
             });
 
-            // Update Study Mode Buttons
             ['red', 'yellow', 'green'].forEach(mode => {
                 const btn = document.getElementById(`btn-mode-${mode}`);
                 const count = studyCounts[mode];
@@ -715,7 +823,6 @@
         }
 
         function updateMonthlyStats(allHistory) {
-            // Use viewYear/viewMonth
             const monthName = new Date(viewYear, viewMonth).toLocaleString('default', { month: 'long' });
             document.getElementById('currentMonthName').innerText = `${monthName} ${viewYear}`;
 
@@ -732,8 +839,6 @@
             }
 
             const totalScore = monthDates.reduce((sum, date) => sum + (allHistory[date].score || 0), 0);
-            
-            // NEW: Divide by total days in the month (e.g. 30 or 31)
             const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
             const avgScore = Math.round(totalScore / daysInMonth);
 
@@ -744,7 +849,6 @@
         }
 
         function updateYearlyStats(allHistory) {
-            // Use viewYear
             const container = document.getElementById('yearlyStatsGrid');
             container.innerHTML = '';
 
@@ -760,15 +864,12 @@
                 let colorStyle = "#ccc";
                 let boxClass = "month-box";
                 
-                // Highlight Selected Month
                 if (index === viewMonth) {
                     boxClass += " selected-month";
                 }
 
                 if (monthDates.length > 0) {
                     const total = monthDates.reduce((sum, d) => sum + (allHistory[d].score || 0), 0);
-                    
-                    // NEW: Divide by total days in the month
                     const daysInThisMonth = new Date(viewYear, index + 1, 0).getDate();
                     const avg = Math.round(total / daysInThisMonth);
                     
@@ -793,7 +894,6 @@
             const tbody = document.querySelector('#historyTable tbody');
             tbody.innerHTML = '';
             
-            // "dates" is already filtered for the viewMonth
             [...dates].reverse().forEach(date => {
                 const day = allHistory[date];
                 if (day.score === 0 && !day.studyMode && habitsList.every(h => !day[h])) return;
@@ -802,7 +902,6 @@
                 if(day.score >= 50) scoreColor = '#f1c40f';
                 if(day.score >= 80) scoreColor = '#2ecc71';
 
-                // Format Date as DD-MM-YY
                 const [y, m, d] = date.split('-');
                 const formattedDate = `${d}-${m}-${y.slice(2)}`;
 
@@ -830,20 +929,18 @@
 
         function updateChart(dates, allHistory) {
             const ctx = document.getElementById('progressChart').getContext('2d');
-            // "dates" is already filtered for the viewMonth
             const scores = dates.map(d => allHistory[d].score || 0);
 
             if(myChart) myChart.destroy();
 
-            // Create Gradient
             let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(52, 152, 219, 0.5)'); // Top color
-            gradient.addColorStop(1, 'rgba(52, 152, 219, 0.0)'); // Bottom transparent
+            gradient.addColorStop(0, 'rgba(52, 152, 219, 0.5)'); 
+            gradient.addColorStop(1, 'rgba(52, 152, 219, 0.0)'); 
 
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: dates.map(d => d.slice(5)), // Show MM-DD
+                    labels: dates.map(d => d.slice(5)), 
                     datasets: [{
                         label: 'Mastery Score',
                         data: scores,
@@ -856,7 +953,7 @@
                         pointRadius: 4,
                         pointHoverRadius: 6,
                         fill: true,
-                        tension: 0.4 // Smoother curve
+                        tension: 0.4 
                     }]
                 },
                 options: {
@@ -870,15 +967,13 @@
                                 color: 'rgba(0, 0, 0, 0.05)',
                                 borderDash: [5, 5]
                             },
-                            ticks: {
-                                font: { family: "'Segoe UI', sans-serif" }
-                            }
+                            ticks: { font: { family: "'Segoe UI', sans-serif" } }
                         },
                         x: {
                             grid: { display: false },
                             ticks: {
                                 font: { family: "'Segoe UI', sans-serif" },
-                                maxTicksLimit: 10 // Avoid clutter
+                                maxTicksLimit: 10 
                             }
                         }
                     },
@@ -904,7 +999,7 @@
 
         function exportToExcel() {
             if (typeof XLSX === 'undefined') {
-                alert('Excel library (SheetJS) is loading. Please try again in a moment.');
+                showModal('Excel library is loading. Please try again in a moment.', 'alert');
                 return;
             }
 
@@ -912,7 +1007,7 @@
             const dates = Object.keys(allHistory).sort();
 
             if (dates.length === 0) {
-                alert("No data to export!");
+                showModal("No data to export!", 'alert');
                 return;
             }
 
@@ -943,8 +1038,76 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Mastery Data");
                 XLSX.writeFile(wb, `Mastery_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
             } catch (e) {
-                alert("Export failed. Please try opening this file in a real browser.");
+                showModal("Export failed. Please try opening this file in a real browser.", 'alert');
             }
+        }
+
+        function importFromExcel(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (typeof XLSX === 'undefined') {
+                showModal('Excel library not loaded yet. Please wait.', 'alert');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {raw: false}); // raw:false keeps dates as strings
+
+                    if (jsonData.length === 0) {
+                        showModal("No data found in file.", 'alert');
+                        return;
+                    }
+
+                    // Process Data
+                    const restoredHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
+                    let count = 0;
+
+                    jsonData.forEach(row => {
+                        // Map back to internal format
+                        // Row keys match the Export headers: "Date", "Score", "Study Mode", etc.
+                        const date = row["Date"];
+                        if (!date) return;
+
+                        const entry = {
+                            score: parseInt(row["Score"]) || 0,
+                            studyMode: row["Study Mode"] || 'none',
+                            // Habits
+                            wakeUp: row["Wake Up"] === 'Yes',
+                            exercise: row["Exercise"] === 'Yes',
+                            meditation: row["Meditation"] === 'Yes',
+                            prayer: row["Prayer"] === 'Yes',
+                            walk: row["Walk"] === 'Yes',
+                            reading: row["Reading"] === 'Yes',
+                            skills: row["Skills"] === 'Yes',
+                            noD: row["No D"] === 'Yes',
+                            noP: row["No P"] === 'Yes'
+                        };
+                        
+                        restoredHistory[date] = entry;
+                        count++;
+                    });
+
+                    localStorage.setItem('masteryTracker_v2', JSON.stringify(restoredHistory));
+                    showModal(`Successfully restored ${count} days of history.`, 'alert');
+                    
+                    // Refresh View
+                    loadDateData();
+                    // Clear input so same file can be selected again if needed
+                    input.value = '';
+
+                } catch (err) {
+                    console.error(err);
+                    showModal("Error parsing file. Make sure it is a valid Excel file exported from this app.", 'alert');
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         function clearPreviousYears() {
@@ -957,31 +1120,43 @@
             });
 
             if (keysToDelete.length === 0) {
-                alert(`No data found from years before ${currentYear}.`);
+                showModal(`No data found from years before ${currentYear}.`, 'alert');
                 return;
             }
 
-            if(confirm(`Are you sure you want to delete ${keysToDelete.length} records from before ${currentYear}? This cannot be undone.`)) {
-                keysToDelete.forEach(key => delete allHistory[key]);
-                localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
-                alert("Previous years' data has been cleared.");
-                loadDateData(); 
-            }
+            // First Confirmation
+            showModal(`Are you sure you want to delete ${keysToDelete.length} records from before ${currentYear}?`, 'confirm', () => {
+                // Second Confirmation (Double Check)
+                setTimeout(() => {
+                    showModal("⚠️ FINAL WARNING: This action cannot be undone. Are you absolutely sure?", 'confirm', () => {
+                        keysToDelete.forEach(key => delete allHistory[key]);
+                        localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
+                        showModal("Previous years' data has been cleared.", 'alert');
+                        loadDateData(); 
+                    });
+                }, 200);
+            });
         }
 
         function clearData() {
-            if(confirm("Permanently delete ALL history (including this year)? This cannot be undone.")) {
-                localStorage.removeItem('masteryTracker_v2');
-                currentData = {};
-                habitsList.forEach(h => currentData[h] = false);
-                currentData['studyMode'] = null;
-                currentData['score'] = 0;
-                updateUIState();
-                renderHistoryAndGraph(); 
-                document.getElementById('monthlyScoreValue').innerText = "--";
-                document.getElementById('monthlyScoreValue').style.color = "#ccc";
-                alert("All data has been reset.");
-            }
+            // First Confirmation
+            showModal("Permanently delete ALL history (including this year)?", 'confirm', () => {
+                // Second Confirmation (Double Check)
+                setTimeout(() => {
+                    showModal("⚠️ FINAL WARNING: This will wipe everything permanently. Continue?", 'confirm', () => {
+                        localStorage.removeItem('masteryTracker_v2');
+                        currentData = {};
+                        habitsList.forEach(h => currentData[h] = false);
+                        currentData['studyMode'] = null;
+                        currentData['score'] = 0;
+                        updateUIState();
+                        renderHistoryAndGraph(); 
+                        document.getElementById('monthlyScoreValue').innerText = "--";
+                        document.getElementById('monthlyScoreValue').style.color = "#ccc";
+                        showModal("All data has been reset.", 'alert');
+                    });
+                }, 200);
+            });
         }
     </script>
 </body>
