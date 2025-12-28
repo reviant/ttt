@@ -10,12 +10,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#f0f2f5">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mastery">
+
+    <!-- Standard Icon for iOS/Android (outside manifest) -->
+    <link rel="apple-touch-icon" href="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f680.png">
+    <link rel="icon" type="image/png" href="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f680.png">
 
     <!-- EMBEDDED MANIFEST FOR ANDROID INSTALLATION -->
+    <!-- Configured specifically for GitHub Pages Subdirectories -->
     <link rel="manifest" href='data:application/manifest+json,{
         "name": "Mastery Tracker",
         "short_name": "Mastery",
-        "start_url": "./index.html",
+        "start_url": ".",
+        "scope": ".",
         "display": "standalone",
         "orientation": "portrait",
         "background_color": "#f0f2f5",
