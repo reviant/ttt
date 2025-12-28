@@ -2,24 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Updated Viewport for App-like feel (prevents zooming) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <!-- Mobile Web App Settings -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#f0f2f5">
+    <meta name="theme-color" content="#2c3e50">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mastery">
 
-    <!-- Standard Icon for iOS/Android (outside manifest) -->
-    <link rel="apple-touch-icon" href="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f680.png">
-    <link rel="icon" type="image/png" href="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f680.png">
+    <!-- 
+        MODERN APP ICON (SVG Data URI) 
+        This generates a solid dark blue square with the Lion centered.
+        It is used for the Favicon and Apple Touch Icon.
+    -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%232c3e50'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='256'>🦁</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%232c3e50'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='256'>🦁</text></svg>">
     <link rel="canonical" href="https://reviant.github.io/ttt/" />
 
-    <!-- EMBEDDED MANIFEST FOR ANDROID INSTALLATION -->
-    <!-- FIXED: URL-Encoded JSON to prevent parsing errors on Android -->
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Mastery%20Tracker%22%2C%22short_name%22%3A%22Mastery%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23f0f2f5%22%2C%22theme_color%22%3A%22%23f0f2f5%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Ftwemoji%2F14.0.2%2F72x72%2F1f680.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Ftwemoji%2F14.0.2%2F72x72%2F1f680.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+    <!-- 
+        EMBEDDED MANIFEST FOR ANDROID INSTALLATION 
+        - Uses the same SVG Data URI for the icon.
+        - Adds "purpose": "any maskable" to ensure Android crops it into the modern squircle/circle shape.
+    -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Mastery%20Tracker%22%2C%22short_name%22%3A%22Mastery%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%232c3e50%22%2C%22theme_color%22%3A%22%232c3e50%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20fill%3D'%25232c3e50'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'50%25'%20dominant-baseline%3D'central'%20text-anchor%3D'middle'%20font-size%3D'256'%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22sizes%22%3A%22512x512%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
     <title>Mastery Tracker Pro</title>
     <!-- Chart.js for graphs -->
@@ -368,7 +374,7 @@
 </head>
 <body>
 
-    <h1>🚀 Self Mastery</h1>
+    <h1>🦁 Self Mastery</h1>
     <div class="subtitle">Track Habits, Study, and Discipline</div>
 
     <!-- Task Input Box -->
