@@ -12,20 +12,33 @@
     <meta name="apple-mobile-web-app-title" content="Mastery">
 
     <!-- 
-        MODERN APP ICON (SVG Data URI) 
-        This generates a solid dark blue square with the Lion centered.
-        It is used for the Favicon and Apple Touch Icon.
+        MODERN APP ICON (Base64 Encoded SVG)
+        Lion 🦁 on Dark Blue Square #2c3e50
     -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%232c3e50'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='256'>🦁</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%232c3e50'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='256'>🦁</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48cmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgZmlsbD0nIzJjM2U1MCcvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nY2VudHJhbCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyNTYnPvCfmjg8L3RleHQ+PC9zdmc+">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48cmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgZmlsbD0nIzJjM2U1MCcvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nY2VudHJhbCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyNTYnPvCfmjg8L3RleHQ+PC9zdmc+">
     <link rel="canonical" href="https://reviant.github.io/ttt/" />
 
     <!-- 
-        EMBEDDED MANIFEST FOR ANDROID INSTALLATION 
-        - Uses the same SVG Data URI for the icon.
-        - Adds "purpose": "any maskable" to ensure Android crops it into the modern squircle/circle shape.
+        EMBEDDED MANIFEST (Base64 Encoded)
+        Encoded to prevent syntax errors on Android.
+        Decodes to:
+        {
+            "name": "Mastery",
+            "short_name": "Mastery",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#2c3e50",
+            "theme_color": "#2c3e50",
+            "icons": [{
+                "src": "data:image/svg+xml;base64,PHN2Zy... (The Lion Icon above)",
+                "sizes": "512x512",
+                "type": "image/svg+xml",
+                "purpose": "any maskable"
+            }]
+        }
     -->
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Mastery%20Tracker%22%2C%22short_name%22%3A%22Mastery%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%232c3e50%22%2C%22theme_color%22%3A%22%232c3e50%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20fill%3D'%25232c3e50'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'50%25'%20dominant-baseline%3D'central'%20text-anchor%3D'middle'%20font-size%3D'256'%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22sizes%22%3A%22512x512%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiTWFzdGVyeSIsInNob3J0X25hbWUiOiJNYXN0ZXJ5Iiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMyYzNlNTAiLCJ0aGVtZV9jb2xvciI6IiMyYzNlNTAiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejwnaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48cmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgZmlsbD0nIzJjM2U1MCcvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nY2VudHJhbCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyNTYnPvCfmjg8L3RleHQ+PC9zdmc+Iiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJwdXJwb3NlIjoiYW55IG1hc2thYmxlIn1dfQ==">
 
     <title>Mastery Tracker Pro</title>
     <!-- Chart.js for graphs -->
