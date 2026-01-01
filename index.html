@@ -13,7 +13,7 @@
 
     <!-- 
         BROWSER TAB ICONS (Custom SVG Data URI)
-        This keeps the custom "Lion on Blue Square" look for the browser tab/favorites.
+        Lion 🦁 on Dark Blue Square #2c3e50
     -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48cmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgZmlsbD0nIzJjM2U1MCcvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nY2VudHJhbCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyNTYnPvCfmjg8L3RleHQ+PC9zdmc+">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48cmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgZmlsbD0nIzJjM2U1MCcvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nY2VudHJhbCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyNTYnPvCfmjg8L3RleHQ+PC9zdmc+">
@@ -21,16 +21,13 @@
 
     <!-- 
         EMBEDDED MANIFEST (Compatibility Mode)
-        - Uses HTTPS URL for icons (Fixes "Not Installing" bug).
-        - Sets background_color to Dark Blue to create the "App Icon" look on Android.
-        - URL Encoded for safety.
+        - Uses HTTPS URL for icons (Fixes installation issues).
+        - Sets background_color to Dark Blue.
     -->
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Mastery%20Tracker%22%2C%22short_name%22%3A%22Mastery%22%2C%22start_url%22%3A%22index.html%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%232c3e50%22%2C%22theme_color%22%3A%22%232c3e50%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Ftwemoji%2F14.0.2%2F72x72%2F1f981.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Ftwemoji%2F14.0.2%2F72x72%2F1f981.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
     <title>Mastery Tracker Pro</title>
-    <!-- Chart.js for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS for Excel Export (Standard CDN) -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -51,7 +48,6 @@
             padding: 20px;
             max-width: 700px;
             margin: 0 auto;
-            /* Prevent pull-to-refresh on mobile to feel more like an app */
             overscroll-behavior-y: contain; 
         }
 
@@ -92,7 +88,7 @@
         }
         .yearly-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 months per row */
+            grid-template-columns: repeat(3, 1fr); 
             gap: 10px;
         }
         .month-box {
@@ -100,7 +96,7 @@
             padding: 10px;
             border-radius: 8px;
             text-align: center;
-            border: 2px solid #eee; /* Slightly thicker border for selection visibility */
+            border: 2px solid #eee; 
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -115,10 +111,8 @@
         .month-name { font-size: 12px; color: #666; font-weight: bold; margin-bottom: 4px; }
         .month-score { font-size: 16px; font-weight: bold; color: #333; }
         .month-box.has-data { border-color: #ddd; }
-        /* When selected, override the has-data border */
         .month-box.has-data.selected-month { border-color: var(--primary); }
 
-        /* Year Selector */
         #yearSelect {
             padding: 5px 10px;
             border-radius: 6px;
@@ -139,7 +133,7 @@
         /* --- HABIT GRID --- */
         .habit-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 columns */
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             margin-top: 15px;
         }
@@ -147,7 +141,7 @@
         .habit-btn {
             padding: 15px;
             border: 2px solid #eee;
-            background: #fff; /* Fallback */
+            background: #fff;
             border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
@@ -160,26 +154,21 @@
             justify-content: center;
             text-align: center;
             position: relative;
-            overflow: hidden; /* For progress bar containment */
-            /* Better touch target for mobile */
+            overflow: hidden; 
             min-height: 80px; 
         }
 
-        /* Active State (Border/Text) */
         .habit-btn.active {
             border-color: var(--success);
             color: var(--success);
-            /* Background set dynamically via JS */
         }
         
-        /* Locked State (Read Only) */
         .habit-btn.locked, .mode-btn.locked {
             opacity: 0.6;
             cursor: not-allowed !important;
             filter: grayscale(0.2);
         }
         
-        /* Specific styles for No D / No P */
         .habit-btn[data-habit="noD"], .habit-btn[data-habit="noP"] {
             border-color: #ffe0e0;
         }
@@ -197,12 +186,12 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            opacity: 0.8; /* Slightly readable if background is light */
+            opacity: 0.8;
             transition: 0.2s;
             text-align: center;
-            background: #f0f0f0; /* Fallback */
+            background: #f0f0f0;
             color: #555;
-            min-height: 70px; /* Better touch target */
+            min-height: 70px;
         }
         
         .mode-btn.selected { 
@@ -265,7 +254,6 @@
         }
         .reset-btn-year:hover { background: #fff0f0; }
 
-        /* --- STATUS INDICATOR --- */
         #status-indicator {
             text-align: right;
             font-size: 12px;
@@ -284,7 +272,6 @@
             margin-top: 2px;
         }
 
-        /* --- SCORE PILL (UPDATED) --- */
         .score-pill {
             display: inline-block;
             padding: 6px 14px;
@@ -562,23 +549,24 @@
             renderHistoryAndGraph();
         }
 
-        // --- HELPER: CHECK IF DATE IS READ ONLY (PAST MONTH) ---
+        // --- HELPER: CHECK IF DATE IS READ ONLY ---
+        // Logic: Data locks after the 15th of the FOLLOWING month.
         function isDateReadOnly(dateStr) {
             if(!dateStr) return false;
             const [y, m, d] = dateStr.split('-').map(Number);
-            const selDate = new Date(y, m - 1, d);
+            // Selected Date
+            // Note: 'm' from split is 1-12. Date() needs 0-11.
+            
+            // Calculate Deadline: 15th of the NEXT month from the selected date.
+            // new Date(y, m, 15) automatically creates 15th of next month (since m is 1-based, equivalent to next month 0-based)
+            // Example: Selected 2024-01-20 (Jan). y=2024, m=1.
+            // new Date(2024, 1, 15) -> Feb 15, 2024.
+            const deadlineDate = new Date(y, m, 15, 23, 59, 59, 999); 
+            
             const today = new Date();
             
-            const selYear = selDate.getFullYear();
-            const selMonth = selDate.getMonth();
-            
-            const curYear = today.getFullYear();
-            const curMonth = today.getMonth();
-            
-            if (selYear < curYear) return true;
-            if (selYear === curYear && selMonth < curMonth) return true;
-            
-            return false;
+            // If today is past the deadline, it is locked.
+            return today > deadlineDate;
         }
 
         // --- MODAL UTILS ---
@@ -648,7 +636,7 @@
             const statusInd = document.getElementById('status-indicator');
 
             if (isLocked) {
-                statusInd.innerHTML = "🔒 Locked (Past Month)";
+                statusInd.innerHTML = "🔒 Locked"; 
                 statusInd.style.opacity = '1';
                 statusInd.style.color = '#7f8c8d'; 
             } else {
