@@ -666,9 +666,6 @@
             
             <div style="border-top: 1px solid var(--border-color); width: 100%; margin: 10px 0;"></div>
             
-            <!-- Random Data Button -->
-            <button onclick="generateRandomData()" style="color:var(--primary); background:none; border:1px dashed var(--primary); padding:8px 15px; border-radius:8px; cursor:pointer; font-size:13px;">🎲 Generate Random Data (Test)</button>
-            
             <button onclick="clearPreviousYears()" class="reset-btn-year">🗑️ Clear Previous Years Data</button>
             <button onclick="clearData()" style="color:var(--subtitle-color); background:none; border:none; cursor:pointer; font-size:12px;">Reset All Data</button>
         </div>
@@ -1497,55 +1494,6 @@
                 } catch (err) { showModal("Error parsing file.", 'alert'); }
             };
             reader.readAsArrayBuffer(file);
-        }
-
-        // --- RANDOM DATA GENERATOR ---
-        function generateRandomData() {
-            showModal("Generate random data for the current AND previous year? This is for testing visuals.", 'confirm', () => {
-                const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
-                const currentYear = new Date().getFullYear();
-                
-                // Start from Jan 1st of the PREVIOUS year
-                const start = new Date(currentYear - 1, 0, 1); 
-                const end = new Date(); // Today
-
-                // Loop from Start to Today
-                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                    // Use local date string construction to avoid UTC shift
-                    const y = d.getFullYear();
-                    const m = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    const dateStr = `${y}-${m}-${day}`;
-                    
-                    // Random Habits
-                    const habits = {};
-                    let points = 0;
-                    habitKeys.forEach(k => {
-                        const active = Math.random() > 0.4; // 60% chance
-                        habits[k] = active;
-                        if(active) points++;
-                    });
-
-                    // Random Study Mode
-                    const modes = ['red', 'yellow', 'green', 'none', 'none']; // weighted
-                    const mode = modes[Math.floor(Math.random() * modes.length)];
-                    
-                    if(mode === 'green' || mode === 'yellow' || mode === 'red') points++;
-
-                    const score = Math.round((points / 10) * 100);
-
-                    allHistory[dateStr] = {
-                        ...habits,
-                        studyMode: mode === 'none' ? null : mode,
-                        score: score,
-                        journal: Math.random() > 0.9 ? "Simulated journal entry." : ""
-                    };
-                }
-                
-                localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
-                loadDateData();
-                showModal("Random data generated for this year and last year!", 'alert');
-            });
         }
 
         function showModal(message, type = 'alert', onConfirm = null) {
