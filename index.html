@@ -200,7 +200,7 @@
             z-index: 2;
         }
 
-        /* --- YEARLY GRID (Redesigned) --- */
+        /* --- YEARLY GRID & HEATMAP --- */
         .yearly-header {
             display: flex;
             justify-content: space-between;
@@ -209,93 +209,57 @@
         }
         .yearly-month-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 months per row */
-            gap: 8px;
+            grid-template-columns: repeat(3, 1fr); /* 3 months per row */
+            gap: 10px;
             margin-bottom: 20px;
         }
         .month-box {
-            background: var(--input-bg);
-            padding: 10px 5px;
-            border-radius: 10px;
+            background: var(--bg-color);
+            padding: 10px;
+            border-radius: 8px;
             text-align: center;
             border: 1px solid var(--border-color);
             cursor: pointer;
             transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
         }
         .month-box:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: var(--primary);
         }
         .month-box.selected-month {
-            background: var(--bg-color);
-            box-shadow: inset 0 0 0 1px var(--primary);
+            border-color: var(--primary);
+            background: rgba(52, 152, 219, 0.1);
         }
-        .month-name { 
-            font-size: 10px; 
-            color: var(--subtitle-color); 
-            font-weight: 700; 
-            margin-bottom: 2px;
-            text-transform: uppercase;
-        }
-        .month-score { 
-            font-size: 16px; 
-            font-weight: 800; 
-            color: var(--heading-color); 
-        }
-        /* Color strip at bottom of month card */
-        .month-box::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: transparent;
-        }
-        .month-box.score-high::after { background: var(--success); }
-        .month-box.score-med::after { background: var(--warning); }
-        .month-box.score-low::after { background: var(--danger); }
+        .month-name { font-size: 12px; color: var(--subtitle-color); font-weight: bold; margin-bottom: 4px; }
+        .month-score { font-size: 16px; font-weight: bold; color: var(--text-color); }
 
-        /* --- HEATMAP (GitHub Style) --- */
         .heatmap-container {
-            padding: 10px;
-            background: var(--input-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 5px;
             overflow-x: auto;
-            /* Scrollbar styling */
-            scrollbar-width: thin;
-            scrollbar-color: var(--subtitle-color) transparent;
         }
         .heatmap-grid {
             display: grid;
-            /* 7 rows for days of week */
-            grid-template-rows: repeat(7, 1fr); 
-            /* Fill columns first (Vertical flow like GitHub) */
-            grid-auto-flow: column; 
-            gap: 3px;
-            height: 90px; /* Fixed height for 7 small squares */
-            width: max-content; /* Ensure it expands horizontally */
+            grid-template-columns: repeat(53, 1fr); /* Weeks */
+            gap: 2px;
         }
         .heatmap-cell {
-            width: 10px;
-            height: 10px;
+            width: 100%;
+            aspect-ratio: 1;
             background-color: var(--heatmap-empty);
             border-radius: 2px;
         }
-        
         /* Heatmap Colors */
-        .hm-l1 { background-color: #9be9a8; }
-        .hm-l2 { background-color: #40c463; }
-        .hm-l3 { background-color: #30a14e; }
-        .hm-l4 { background-color: #216e39; }
+        .hm-l1 { background-color: #9be9a8; color: #1b4b28; }
+        .hm-l2 { background-color: #40c463; color: white;}
+        .hm-l3 { background-color: #30a14e; color: white;}
+        .hm-l4 { background-color: #216e39; color: white;}
         
-        body.dark-mode .hm-l1 { background-color: #0e4429; }
-        body.dark-mode .hm-l2 { background-color: #006d32; }
-        body.dark-mode .hm-l3 { background-color: #26a641; }
-        body.dark-mode .hm-l4 { background-color: #39d353; }
+        body.dark-mode .hm-l1 { background-color: #0e4429; color: #a3f0c0;}
+        body.dark-mode .hm-l2 { background-color: #006d32; color: white;}
+        body.dark-mode .hm-l3 { background-color: #26a641; color: white;}
+        body.dark-mode .hm-l4 { background-color: #39d353; color: black;}
 
         /* Year Selector */
         #yearSelect {
@@ -662,7 +626,6 @@
         </div>
 
         <!-- Heatmap -->
-        <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px; color: var(--subtitle-color);">Daily Consistency (GitHub Style)</div>
         <div class="heatmap-container">
             <div id="yearHeatmap" class="heatmap-grid">
                 <!-- Heatmap generated by JS -->
@@ -702,6 +665,9 @@
             <button onclick="document.getElementById('restoreInput').click()" class="restore-btn">📤 Restore from Excel</button>
             
             <div style="border-top: 1px solid var(--border-color); width: 100%; margin: 10px 0;"></div>
+            
+            <!-- Random Data Button -->
+            <button onclick="generateRandomData()" style="color:var(--primary); background:none; border:1px dashed var(--primary); padding:8px 15px; border-radius:8px; cursor:pointer; font-size:13px;">🎲 Generate Random Data (Test)</button>
             
             <button onclick="clearPreviousYears()" class="reset-btn-year">🗑️ Clear Previous Years Data</button>
             <button onclick="clearData()" style="color:var(--subtitle-color); background:none; border:none; cursor:pointer; font-size:12px;">Reset All Data</button>
@@ -1146,6 +1112,8 @@
                     else dayEl.classList.add('hm-l1');
                 }
 
+                // Simple check: todayStr might need timezone fix too if not using local helper
+                // But for basic visual it's ok. editDateStr is reliable.
                 if (dateStr === editDateStr) {
                     dayEl.classList.add('selected-day');
                 }
@@ -1159,34 +1127,63 @@
             const container = document.getElementById('yearlyStatsGrid');
             container.innerHTML = '';
             const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const now = new Date();
 
             monthNames.forEach((month, index) => {
+                // Filter dates for this specific month index
                 const monthDates = Object.keys(allHistory).filter(dateStr => {
                     const [y, m, dNum] = dateStr.split('-').map(Number);
                     return y === viewYear && (m - 1) === index;
                 });
 
                 let displayScore = "-";
+                let colorStyle = "var(--text-color)";
                 let boxClass = "month-box";
                 
                 if (index === viewMonth) boxClass += " selected-month";
 
-                if (monthDates.length > 0) {
-                    const total = monthDates.reduce((sum, d) => sum + (allHistory[d].score || 0), 0);
-                    // Avg calculation similar to monthly stats logic below
-                    const avg = Math.round(total / monthDates.length);
-                    displayScore = avg + "%";
-                    boxClass += " has-data";
-                    
-                    if (avg >= 80) boxClass += ' score-high';
-                    else if (avg >= 50) boxClass += ' score-med';
-                    else boxClass += ' score-low';
+                // Calculate Strict Average
+                const total = monthDates.reduce((sum, d) => sum + (allHistory[d].score || 0), 0);
+                
+                let divisor = 1;
+                const daysInMonth = new Date(viewYear, index + 1, 0).getDate();
+
+                if (viewYear === now.getFullYear() && index === now.getMonth()) {
+                    divisor = now.getDate(); // Current month: days passed
+                } else if (viewYear < now.getFullYear() || (viewYear === now.getFullYear() && index < now.getMonth())) {
+                    divisor = daysInMonth; // Past month: full days
+                } else {
+                    // Future month
+                    divisor = 1; 
+                }
+
+                // Only show score if it's a past month OR current month
+                const isFuture = (viewYear > now.getFullYear()) || (viewYear === now.getFullYear() && index > now.getMonth());
+                
+                if (!isFuture) {
+                    // Show score even if it's 0, unless NO data exists at all
+                    if(monthDates.length > 0) {
+                        const avg = Math.round(total / divisor);
+                        displayScore = avg + "%";
+                        
+                        if (avg >= 80) colorStyle = 'var(--success)';
+                        else if (avg >= 50) colorStyle = 'var(--warning)';
+                        else colorStyle = 'var(--danger)';
+                        
+                        // Add has-data class if there is actual data
+                        boxClass += " has-data"; 
+                    } else {
+                        // Strictly speaking, 0 data = 0 score, but visually keep empty months as "-" 
+                        // unless user explicitly wants to see 0% for untracked months.
+                        // Keeping as "-" for now as discussed ("-- if strictly no data exists")
+                        displayScore = "--";
+                    }
                 }
 
                 container.innerHTML += `
                     <div class="${boxClass}" onclick="changeViewMonth(${index - viewMonth})">
                         <div class="month-name">${month}</div>
-                        <div class="month-score">${displayScore}</div>
+                        <div class="month-score" style="color: ${colorStyle}">${displayScore}</div>
                     </div>
                 `;
             });
@@ -1196,27 +1193,10 @@
             const container = document.getElementById('yearHeatmap');
             container.innerHTML = '';
             
-            // Calculate Jan 1st day of week (0=Sun, 1=Mon, etc)
-            const yearStart = new Date(viewYear, 0, 1);
-            const startDay = yearStart.getDay(); // 0 is Sunday
-            
-            // Add empty cells for days before Jan 1st to align the grid correctly
-            // If Sunday (0) is first, we need 0 empty cells? No, usually cols start Sunday.
-            // GitHub starts week on Sunday. So row 0 is Sunday.
-            // Grid fills column by column (vertical).
-            // So Col 1, Row 0 is Jan 1st if it is Sunday.
-            // If Jan 1st is Tuesday (2), then Col 1 Row 0 (Sun) and Col 1 Row 1 (Mon) are empty.
-            
-            for(let i=0; i<startDay; i++) {
-                const empty = document.createElement('div');
-                empty.className = 'heatmap-cell';
-                empty.style.background = 'transparent'; // Invisible spacer
-                container.appendChild(empty);
-            }
-            
             const start = new Date(viewYear, 0, 1);
             const end = new Date(viewYear, 11, 31);
             
+            // Loop using local dates to avoid UTC offset shifts
             for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
                 const y = d.getFullYear();
                 const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -1322,6 +1302,9 @@
             });
 
             const valEl = document.getElementById('monthlyScoreValue');
+            
+            // STRICT LOGIC:
+            // If no data exists at all for this month, keep it clean as "--".
             if (monthDates.length === 0) {
                 valEl.innerText = "--";
                 valEl.style.color = "var(--subtitle-color)";
@@ -1336,8 +1319,10 @@
             if (viewYear === now.getFullYear() && viewMonth === now.getMonth()) {
                 divisor = now.getDate(); // Days passed so far in current month
             } else if (viewYear < now.getFullYear() || (viewYear === now.getFullYear() && viewMonth < now.getMonth())) {
+                // Past month
                 divisor = new Date(viewYear, viewMonth + 1, 0).getDate(); // Full month days
             } else {
+                // Future month
                 divisor = 1; 
             }
             
@@ -1512,6 +1497,55 @@
                 } catch (err) { showModal("Error parsing file.", 'alert'); }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        // --- RANDOM DATA GENERATOR ---
+        function generateRandomData() {
+            showModal("Generate random data for the current AND previous year? This is for testing visuals.", 'confirm', () => {
+                const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
+                const currentYear = new Date().getFullYear();
+                
+                // Start from Jan 1st of the PREVIOUS year
+                const start = new Date(currentYear - 1, 0, 1); 
+                const end = new Date(); // Today
+
+                // Loop from Start to Today
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    // Use local date string construction to avoid UTC shift
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const dateStr = `${y}-${m}-${day}`;
+                    
+                    // Random Habits
+                    const habits = {};
+                    let points = 0;
+                    habitKeys.forEach(k => {
+                        const active = Math.random() > 0.4; // 60% chance
+                        habits[k] = active;
+                        if(active) points++;
+                    });
+
+                    // Random Study Mode
+                    const modes = ['red', 'yellow', 'green', 'none', 'none']; // weighted
+                    const mode = modes[Math.floor(Math.random() * modes.length)];
+                    
+                    if(mode === 'green' || mode === 'yellow' || mode === 'red') points++;
+
+                    const score = Math.round((points / 10) * 100);
+
+                    allHistory[dateStr] = {
+                        ...habits,
+                        studyMode: mode === 'none' ? null : mode,
+                        score: score,
+                        journal: Math.random() > 0.9 ? "Simulated journal entry." : ""
+                    };
+                }
+                
+                localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
+                loadDateData();
+                showModal("Random data generated for this year and last year!", 'alert');
+            });
         }
 
         function showModal(message, type = 'alert', onConfirm = null) {
