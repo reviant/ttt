@@ -11,19 +11,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mastery">
 
-    <!-- 
-        BROWSER TAB ICONS (Custom SVG Data URI)
-        Lion 🦁 on Dark Blue Square #2c3e50
-    -->
+    <!-- ICONS -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48cmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgZmlsbD0nIzJjM2U1MCcvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nY2VudHJhbCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyNTYnPvCfmjg8L3RleHQ+PC9zdmc+">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48cmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgZmlsbD0nIzJjM2U1MCcvPjx0ZXh0IHg9JzUwJScgeT0nNTAlJyBkb21pbmFudC1iYXNlbGluZT0nY2VudHJhbCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyNTYnPvCfmjg8L3RleHQ+PC9zdmc+">
     <link rel="canonical" href="https://reviant.github.io/ttt/" />
 
-    <!-- 
-        EMBEDDED MANIFEST (Compatibility Mode)
-        - Uses HTTPS URL for icons (Fixes installation issues).
-        - Sets background_color to Dark Blue.
-    -->
+    <!-- MANIFEST -->
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Mastery%20Tracker%22%2C%22short_name%22%3A%22Mastery%22%2C%22start_url%22%3A%22index.html%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%232c3e50%22%2C%22theme_color%22%3A%22%232c3e50%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Ftwemoji%2F14.0.2%2F72x72%2F1f981.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Ftwemoji%2F14.0.2%2F72x72%2F1f981.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
     <title>Mastery Tracker Pro</title>
@@ -34,11 +27,26 @@
             --bg-color: #f0f2f5;
             --card-bg: #ffffff;
             --text-color: #333;
+            --heading-color: #2c3e50;
+            --subtitle-color: #777;
+            --border-color: #eee;
+            --input-bg: #fff;
             --success: #2ecc71;
             --warning: #f1c40f;
             --danger: #e74c3c;
             --primary: #3498db;
-            --dark: #2c3e50;
+            --heatmap-empty: #ebedf0;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --heading-color: #ffffff;
+            --subtitle-color: #aaaaaa;
+            --border-color: #333;
+            --input-bg: #2d2d2d;
+            --heatmap-empty: #2d2d2d;
         }
 
         body {
@@ -49,10 +57,49 @@
             max-width: 700px;
             margin: 0 auto;
             overscroll-behavior-y: contain; 
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        h1 { text-align: center; color: var(--dark); margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #777; margin-bottom: 25px; }
+        /* HEADER & UTILS */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        h1 { 
+            text-align: center; 
+            color: var(--heading-color); 
+            margin: 0; 
+            flex-grow: 1;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+        }
+
+        .subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 15px; }
+
+        .streak-badge {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #e67e22;
+            font-size: 14px;
+            background: rgba(230, 126, 34, 0.1);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
         .card {
             background: var(--card-bg);
@@ -60,92 +107,120 @@
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             margin-bottom: 20px;
+            border: 1px solid var(--border-color);
         }
 
-        /* --- MONTHLY STATS --- */
-        .stats-container {
+        /* --- STATS & WEEKLY --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             text-align: center;
         }
+        .stat-box {
+            background: var(--bg-color);
+            padding: 10px;
+            border-radius: 8px;
+        }
         .stats-title {
-            font-size: 14px;
-            color: #888;
+            font-size: 11px;
+            color: var(--subtitle-color);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 5px;
         }
         .stats-value {
-            font-size: 48px;
+            font-size: 24px;
             font-weight: 800;
-            color: var(--dark);
+            color: var(--heading-color);
         }
+        .stats-value.main { font-size: 32px; }
 
-        /* --- YEARLY OVERVIEW GRID --- */
+        /* --- YEARLY HEATMAP --- */
         .yearly-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        .yearly-grid {
+        .heatmap-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 5px;
+            overflow-x: auto;
         }
-        .month-box {
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px solid #eee; 
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(53, 1fr); /* Weeks */
+            gap: 2px;
         }
-        .month-box:hover {
-            background: #eee;
-            transform: translateY(-2px);
+        .heatmap-cell {
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: var(--heatmap-empty);
+            border-radius: 2px;
         }
-        .month-box.selected-month {
-            border-color: var(--primary);
-            background: #ebf5fb;
-        }
-        .month-name { font-size: 12px; color: #666; font-weight: bold; margin-bottom: 4px; }
-        .month-score { font-size: 16px; font-weight: bold; color: #333; }
-        .month-box.has-data { border-color: #ddd; }
-        .month-box.has-data.selected-month { border-color: var(--primary); }
+        /* Heatmap Colors */
+        .hm-l1 { background-color: #9be9a8; }
+        .hm-l2 { background-color: #40c463; }
+        .hm-l3 { background-color: #30a14e; }
+        .hm-l4 { background-color: #216e39; }
+        
+        body.dark-mode .hm-l1 { background-color: #0e4429; }
+        body.dark-mode .hm-l2 { background-color: #006d32; }
+        body.dark-mode .hm-l3 { background-color: #26a641; }
+        body.dark-mode .hm-l4 { background-color: #39d353; }
 
+        /* Year Selector */
         #yearSelect {
             padding: 5px 10px;
             border-radius: 6px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             font-size: 16px;
             font-weight: bold;
-            color: var(--dark);
+            color: var(--text-color);
+            background: var(--input-bg);
             cursor: pointer;
         }
 
         /* --- GRAPH SECTION --- */
         .chart-container {
             position: relative;
-            height: 250px;
+            height: 200px;
             width: 100%;
         }
 
         /* --- HABIT GRID --- */
+        .habit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        .edit-labels-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
         .habit-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            margin-top: 15px;
         }
 
         .habit-btn {
             padding: 15px;
-            border: 2px solid #eee;
-            background: #fff;
+            border: 2px solid var(--border-color);
+            background: var(--input-bg);
             border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
-            color: #777;
+            color: var(--subtitle-color);
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -166,11 +241,11 @@
         .habit-btn.locked, .mode-btn.locked {
             opacity: 0.6;
             cursor: not-allowed !important;
-            filter: grayscale(0.2);
+            filter: grayscale(0.8);
         }
         
         .habit-btn[data-habit="noD"], .habit-btn[data-habit="noP"] {
-            border-color: #ffe0e0;
+            border-color: rgba(231, 76, 60, 0.2); 
         }
         .habit-btn.active[data-habit="noD"], .habit-btn.active[data-habit="noP"] {
             border-color: var(--success);
@@ -182,15 +257,15 @@
         .mode-btn {
             flex: 1;
             padding: 12px;
-            border: none;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             opacity: 0.8;
             transition: 0.2s;
             text-align: center;
-            background: #f0f0f0;
-            color: #555;
+            background: var(--input-bg);
+            color: var(--subtitle-color);
             min-height: 70px;
         }
         
@@ -201,19 +276,36 @@
             border: 2px solid rgba(0,0,0,0.1);
         }
         
-        .mode-btn.red.selected { color: #8a1c1c; border-color: var(--danger); }
-        .mode-btn.yellow.selected { color: #755f00; border-color: var(--warning); }
-        .mode-btn.green.selected { color: #145e32; border-color: var(--success); }
+        .mode-btn.red.selected { color: #8a1c1c; border-color: var(--danger); background: #fadbd8; }
+        .mode-btn.yellow.selected { color: #755f00; border-color: var(--warning); background: #fcf3cf; }
+        .mode-btn.green.selected { color: #145e32; border-color: var(--success); background: #d5f5e3; }
 
 
-        /* --- FORM CONTROLS --- */
+        /* --- FORM CONTROLS & JOURNAL --- */
         input[type="date"] {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 16px;
             box-sizing: border-box; 
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        textarea.journal-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box; 
+            background: var(--input-bg);
+            color: var(--text-color);
+            margin-top: 15px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
         }
 
         .export-btn {
@@ -252,7 +344,7 @@
             cursor: pointer;
             margin-top: 5px;
         }
-        .reset-btn-year:hover { background: #fff0f0; }
+        .reset-btn-year:hover { background: rgba(231, 76, 60, 0.1); }
 
         #status-indicator {
             text-align: right;
@@ -302,12 +394,10 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
         }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-box {
-            background: white;
+            background: var(--card-bg);
+            color: var(--text-color);
             padding: 25px;
             border-radius: 16px;
             width: 90%;
@@ -317,26 +407,10 @@
             transform: scale(0.9);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .modal-overlay.active .modal-box {
-            transform: scale(1);
-        }
-        .modal-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--dark);
-        }
-        .modal-message {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: var(--heading-color); }
+        .modal-message { color: var(--subtitle-color); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
         .modal-btn {
             padding: 10px 20px;
             border-radius: 8px;
@@ -346,22 +420,29 @@
             font-size: 14px;
             min-width: 80px;
         }
-        .modal-btn-cancel {
-            background: #f1f2f6;
-            color: #747d8c;
+        .modal-btn-cancel { background: var(--border-color); color: var(--text-color); }
+        .modal-btn-confirm { background: var(--primary); color: white; }
+        .modal-btn-confirm.danger { background: var(--danger); }
+
+        /* Edit Labels Modal specific */
+        .label-edit-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            text-align: left;
         }
-        .modal-btn-confirm {
-            background: var(--primary);
-            color: white;
-        }
-        .modal-btn-confirm.danger {
-            background: var(--danger);
-        }
+        .label-edit-row label { flex: 1; font-size: 12px; color: var(--subtitle-color); }
+        .label-edit-row input { flex: 2; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color);}
     </style>
 </head>
 <body>
 
-    <h1>🦁 Self Mastery</h1>
+    <div class="app-header">
+        <h1>🦁 Self Mastery</h1>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌑</button>
+    </div>
+    
+    <div class="streak-badge" id="streakDisplay">🔥 Streak: 0 Days</div>
     <div class="subtitle">Track Habits, Study, and Discipline</div>
 
     <!-- Task Input Box -->
@@ -373,7 +454,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <label style="font-weight:bold;">
                     Study Mode 
-                    <span id="totalStudyCount" style="font-weight:normal; font-size:0.85em; color:#666; margin-left:8px;">(Total: 0 days)</span>
+                    <span id="totalStudyCount" style="font-weight:normal; font-size:0.85em; color:var(--subtitle-color); margin-left:8px;">(Total: 0 days)</span>
                 </label>
                 <div id="status-indicator">✅ Saved</div>
             </div>
@@ -391,50 +472,60 @@
             </div>
         </div>
 
-        <div style="margin-top: 25px;">
+        <div class="habit-header">
             <label style="font-weight:bold;">Daily Habits</label>
-            <div class="habit-grid">
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="wakeUp">🌅 Wake Up</button>
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="exercise">💪 Exercise</button>
-                
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="meditation">🧘 Meditation</button>
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="prayer">🙏 Prayer</button>
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="walk">🚶 Walk</button>
-                
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="reading">📚 Reading</button>
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="skills">💻 Skills/Code</button>
-                
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="noD">🛡️ No D</button>
-                <button class="habit-btn" onclick="toggleHabit(this)" data-habit="noP">🛡️ No P</button>
-            </div>
+            <button class="edit-labels-btn" onclick="openLabelEditor()">⚙️ Customize</button>
         </div>
-        <div style="text-align:center; margin-top:15px; font-size:12px; color:#999;">
+        <div class="habit-grid" id="habitGridContainer">
+            <!-- Habits injected via JS -->
+        </div>
+
+        <div style="margin-top: 20px;">
+            <label style="font-weight:bold; font-size:14px;">📝 Daily Journal</label>
+            <textarea id="journalInput" class="journal-input" placeholder="How was your day? What did you achieve?" onchange="saveJournal()"></textarea>
+        </div>
+
+        <div style="text-align:center; margin-top:15px; font-size:12px; color:var(--subtitle-color);">
             Changes are saved automatically
         </div>
     </div>
 
-    <!-- Monthly Stats Card -->
+    <!-- Stats Card -->
     <div class="card">
-        <div class="stats-container">
-            <div class="stats-title">Average Score for <span id="currentMonthName">--</span></div>
-            <div id="monthlyScoreValue" class="stats-value">--</div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stats-title"><span id="currentMonthName">--</span></div>
+                <div id="monthlyScoreValue" class="stats-value main">--</div>
+            </div>
+            <div class="stat-box">
+                <div class="stats-title">Weekly Trend</div>
+                <div style="font-size:12px; color:var(--subtitle-color); margin-top:5px;">
+                    This Week: <strong id="thisWeekAvg">--</strong><br>
+                    Last Week: <strong id="lastWeekAvg">--</strong>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Yearly Overview Card -->
+    <!-- Yearly Heatmap Card -->
     <div class="card">
         <div class="yearly-header">
             <h3>Yearly Overview</h3>
             <select id="yearSelect" onchange="changeViewYear(this.value)"></select>
         </div>
-        <div id="yearlyStatsGrid" class="yearly-grid">
-            <!-- Grid generated by JS -->
+        <div class="heatmap-container">
+            <div id="yearHeatmap" class="heatmap-grid">
+                <!-- Heatmap generated by JS -->
+            </div>
+        </div>
+        <div style="text-align:right; font-size:10px; color:var(--subtitle-color); margin-top:5px;">
+            Less ■ ■ ■ ■ ■ More
         </div>
     </div>
 
     <!-- Progress Graph -->
     <div class="card">
-        <h3>Progress Graph (Daily Score %)</h3>
+        <h3>Progress Graph</h3>
         <div class="chart-container">
             <canvas id="progressChart"></canvas>
         </div>
@@ -457,14 +548,12 @@
         
         <div style="text-align:center; margin-top:30px; display:flex; flex-direction:column; gap:10px; align-items:center;">
             <button onclick="exportToExcel()" class="export-btn">📥 Export to Excel</button>
-            
-            <!-- Restore Button & Hidden Input -->
             <input type="file" id="restoreInput" style="display:none" accept=".xlsx, .xls" onchange="importFromExcel(this)">
             <button onclick="document.getElementById('restoreInput').click()" class="restore-btn">📤 Restore from Excel</button>
             
-            <div style="border-top: 1px solid #eee; width: 100%; margin: 10px 0;"></div>
+            <div style="border-top: 1px solid var(--border-color); width: 100%; margin: 10px 0;"></div>
             <button onclick="clearPreviousYears()" class="reset-btn-year">🗑️ Clear Previous Years Data</button>
-            <button onclick="clearData()" style="color:#aaa; background:none; border:none; cursor:pointer; font-size:12px;">Reset All Data</button>
+            <button onclick="clearData()" style="color:var(--subtitle-color); background:none; border:none; cursor:pointer; font-size:12px;">Reset All Data</button>
         </div>
     </div>
 
@@ -480,11 +569,25 @@
         </div>
     </div>
 
+    <!-- LABEL EDITOR MODAL -->
+    <div id="label-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">Customize Habits</div>
+            <div id="label-inputs-container" style="max-height:300px; overflow-y:auto; margin-bottom:15px;">
+                <!-- Inputs injected -->
+            </div>
+            <div class="modal-buttons">
+                <button onclick="closeLabelEditor()" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button onclick="saveLabels()" class="modal-btn modal-btn-confirm">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- CONFIG ---
-        const habitsList = ['wakeUp', 'exercise', 'meditation', 'prayer', 'walk', 'reading', 'skills', 'noD', 'noP'];
+        // --- CONFIG & STATE ---
+        const habitKeys = ['wakeUp', 'exercise', 'meditation', 'prayer', 'walk', 'reading', 'skills', 'noD', 'noP'];
         
-        const habitLabels = {
+        let defaultLabels = {
             'wakeUp': '🌅 Wake Up',
             'exercise': '💪 Exercise',
             'meditation': '🧘 Meditation',
@@ -496,6 +599,9 @@
             'noP': '🛡️ No P'
         };
 
+        // Load custom labels or use defaults
+        let habitLabels = JSON.parse(localStorage.getItem('mastery_labels')) || defaultLabels;
+
         const studyLabels = {
             'red': 'GK Only',
             'yellow': 'Concept',
@@ -504,20 +610,26 @@
 
         let currentData = {};
         let myChart = null;
-
-        // View State State variables
         let viewYear = new Date().getFullYear();
-        let viewMonth = new Date().getMonth(); // 0-11
+        let viewMonth = new Date().getMonth(); 
 
         // --- INITIALIZATION ---
+        // 1. Theme
+        const storedTheme = localStorage.getItem('mastery_theme');
+        if (storedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeBtn').textContent = '☀️';
+        }
+
+        // 2. Date
         const dateInput = document.getElementById('dateInput');
         dateInput.valueAsDate = new Date();
         
         initYearSelector();
+        renderHabitButtons(); // Build UI based on labels
         loadDateData(); 
 
         dateInput.addEventListener('change', () => {
-            // When user changes edit date, sync the view to that date
             const d = new Date(dateInput.value);
             viewYear = d.getFullYear();
             viewMonth = d.getMonth();
@@ -525,11 +637,61 @@
             loadDateData(); 
         });
 
+        // --- DARK MODE ---
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌑';
+            localStorage.setItem('mastery_theme', isDark ? 'dark' : 'light');
+            renderHistoryAndGraph(); // Re-render chart for colors
+        }
+
+        // --- CUSTOM LABELS ---
+        function renderHabitButtons() {
+            const container = document.getElementById('habitGridContainer');
+            container.innerHTML = '';
+            habitKeys.forEach(key => {
+                const btn = document.createElement('button');
+                btn.className = 'habit-btn';
+                btn.setAttribute('onclick', 'toggleHabit(this)');
+                btn.setAttribute('data-habit', key);
+                // Content will be filled by updateMonthlyCounts
+                btn.textContent = habitLabels[key]; 
+                container.appendChild(btn);
+            });
+        }
+
+        function openLabelEditor() {
+            const container = document.getElementById('label-inputs-container');
+            container.innerHTML = '';
+            habitKeys.forEach(key => {
+                const row = document.createElement('div');
+                row.className = 'label-edit-row';
+                row.innerHTML = `<label>${key}</label><input type="text" id="edit-${key}" value="${habitLabels[key]}">`;
+                container.appendChild(row);
+            });
+            document.getElementById('label-modal').classList.add('active');
+        }
+
+        function closeLabelEditor() {
+            document.getElementById('label-modal').classList.remove('active');
+        }
+
+        function saveLabels() {
+            habitKeys.forEach(key => {
+                const val = document.getElementById(`edit-${key}`).value;
+                if(val) habitLabels[key] = val;
+            });
+            localStorage.setItem('mastery_labels', JSON.stringify(habitLabels));
+            renderHabitButtons();
+            loadDateData(); // Refresh UI
+            closeLabelEditor();
+        }
+
         // --- YEAR SELECTOR INIT ---
         function initYearSelector() {
             const select = document.getElementById('yearSelect');
             const currentY = new Date().getFullYear();
-            // Allow range from 5 years ago to next year
             for (let y = currentY - 5; y <= currentY + 1; y++) {
                 const opt = document.createElement('option');
                 opt.value = y;
@@ -544,73 +706,13 @@
             renderHistoryAndGraph(); 
         }
 
-        function changeViewMonth(monthIndex) {
-            viewMonth = monthIndex;
-            renderHistoryAndGraph();
-        }
-
-        // --- HELPER: CHECK IF DATE IS READ ONLY ---
-        // Logic: Data locks after the 15th of the FOLLOWING month.
+        // --- HELPER: LOCK DATE (15th of next month) ---
         function isDateReadOnly(dateStr) {
             if(!dateStr) return false;
             const [y, m, d] = dateStr.split('-').map(Number);
-            // Selected Date
-            // Note: 'm' from split is 1-12. Date() needs 0-11.
-            
-            // Calculate Deadline: 15th of the NEXT month from the selected date.
-            // new Date(y, m, 15) automatically creates 15th of next month (since m is 1-based, equivalent to next month 0-based)
-            // Example: Selected 2024-01-20 (Jan). y=2024, m=1.
-            // new Date(2024, 1, 15) -> Feb 15, 2024.
             const deadlineDate = new Date(y, m, 15, 23, 59, 59, 999); 
-            
             const today = new Date();
-            
-            // If today is past the deadline, it is locked.
             return today > deadlineDate;
-        }
-
-        // --- MODAL UTILS ---
-        function showModal(message, type = 'alert', onConfirm = null) {
-            const modal = document.getElementById('custom-modal');
-            const titleEl = document.getElementById('modal-title');
-            const msgEl = document.getElementById('modal-message');
-            const cancelBtn = document.getElementById('modal-btn-cancel');
-            const confirmBtn = document.getElementById('modal-btn-confirm');
-
-            msgEl.textContent = message;
-
-            // Reset styles
-            confirmBtn.classList.remove('danger');
-            confirmBtn.textContent = "OK";
-            
-            // Clean previous listeners to avoid stacking
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-            
-            const newCancelBtn = cancelBtn.cloneNode(true);
-            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
-
-            const closeModal = () => modal.classList.remove('active');
-
-            newCancelBtn.onclick = closeModal;
-
-            if (type === 'confirm') {
-                titleEl.textContent = 'Confirmation Needed';
-                cancelBtn.style.display = 'block';
-                newConfirmBtn.textContent = 'Yes, Delete';
-                newConfirmBtn.classList.add('danger');
-                
-                newConfirmBtn.onclick = () => {
-                    closeModal();
-                    if(onConfirm) onConfirm();
-                };
-            } else {
-                titleEl.textContent = 'Notice';
-                cancelBtn.style.display = 'none';
-                newConfirmBtn.onclick = closeModal;
-            }
-
-            modal.classList.add('active');
         }
 
         // --- DATA LOADING & RESTORATION ---
@@ -622,27 +724,35 @@
                 currentData = allHistory[date];
             } else {
                 currentData = {};
-                habitsList.forEach(h => currentData[h] = false);
+                habitKeys.forEach(h => currentData[h] = false);
                 currentData['studyMode'] = null;
                 currentData['score'] = 0;
+                currentData['journal'] = "";
             }
+
+            // Bind Journal
+            document.getElementById('journalInput').value = currentData.journal || "";
 
             updateUIState();
             renderHistoryAndGraph(); 
+            calculateStreak(allHistory);
         }
 
         function updateUIState() {
             const isLocked = isDateReadOnly(dateInput.value);
             const statusInd = document.getElementById('status-indicator');
+            const journalBox = document.getElementById('journalInput');
 
             if (isLocked) {
                 statusInd.innerHTML = "🔒 Locked"; 
                 statusInd.style.opacity = '1';
                 statusInd.style.color = '#7f8c8d'; 
+                journalBox.disabled = true;
             } else {
                 statusInd.innerHTML = "✅ Saved";
                 statusInd.style.opacity = '0'; 
                 statusInd.style.color = 'var(--success)';
+                journalBox.disabled = false;
             }
 
             document.querySelectorAll('.habit-btn').forEach(btn => {
@@ -669,7 +779,6 @@
         // --- INTERACTION ---
         function toggleHabit(btn) {
             if (isDateReadOnly(dateInput.value)) return;
-
             btn.classList.toggle('active');
             const habitKey = btn.getAttribute('data-habit');
             currentData[habitKey] = btn.classList.contains('active');
@@ -678,7 +787,6 @@
 
         function setStudyMode(mode) {
             if (isDateReadOnly(dateInput.value)) return;
-
             if (currentData['studyMode'] === mode) {
                 currentData['studyMode'] = null;
             } else {
@@ -686,6 +794,12 @@
             }
             updateUIState();
             autoSave(); 
+        }
+
+        function saveJournal() {
+            if (isDateReadOnly(dateInput.value)) return;
+            currentData.journal = document.getElementById('journalInput').value;
+            autoSave();
         }
 
         // --- CORE LOGIC ---
@@ -696,7 +810,7 @@
             if(!currentData['studyMode']) currentData['studyMode'] = 'none';
 
             let points = 0;
-            habitsList.forEach(h => { if(currentData[h]) points++; });
+            habitKeys.forEach(h => { if(currentData[h]) points++; });
             
             if(currentData.studyMode === 'green') points += 1;
             else if(currentData.studyMode === 'yellow') points += 1;
@@ -710,6 +824,7 @@
             localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
 
             renderHistoryAndGraph();
+            calculateStreak(allHistory);
             showSavedIndicator();
         }
 
@@ -717,6 +832,88 @@
             const el = document.getElementById('status-indicator');
             el.style.opacity = '1';
             setTimeout(() => { el.style.opacity = '0'; }, 1500);
+        }
+
+        // --- STREAK CALCULATION ---
+        function calculateStreak(history) {
+            const dates = Object.keys(history).sort().reverse(); // Newest first
+            if(dates.length === 0) {
+                document.getElementById('streakDisplay').innerText = "🔥 Streak: 0 Days";
+                return;
+            }
+
+            // Start active from today
+            let today = new Date();
+            let streak = 0;
+            
+            // Normalize date strings for comparison
+            const toStr = (d) => d.toISOString().split('T')[0];
+            
+            // Check if today is logged and > 0, if not, check yesterday to continue streak
+            let checkDate = new Date();
+            let checkStr = toStr(checkDate);
+            
+            // If today has data > 0, count it. If not, don't break streak yet, check yesterday.
+            if (history[checkStr] && history[checkStr].score > 0) {
+                streak++;
+            }
+            
+            // Iterate backwards
+            for(let i = 1; i < 365; i++) {
+                checkDate.setDate(checkDate.getDate() - 1);
+                checkStr = toStr(checkDate);
+                
+                if (history[checkStr] && history[checkStr].score > 0) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            document.getElementById('streakDisplay').innerText = `🔥 Streak: ${streak} Days`;
+        }
+
+        // --- STATS CALCULATION (Weekly) ---
+        function calculateWeeklyStats(history) {
+            const getWeek = (date) => {
+                const d = new Date(date);
+                d.setHours(0,0,0,0);
+                d.setDate(d.getDate() + 4 - (d.getDay()||7)); // ISO week
+                const yearStart = new Date(d.getFullYear(),0,1);
+                return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+            };
+
+            const now = new Date();
+            const currentWeek = getWeek(now);
+            const currentYear = now.getFullYear();
+
+            let thisWeekSum = 0, thisWeekCount = 0;
+            let lastWeekSum = 0, lastWeekCount = 0;
+
+            Object.keys(history).forEach(dateStr => {
+                const entry = history[dateStr];
+                const d = new Date(dateStr);
+                if (d.getFullYear() !== currentYear) return;
+                
+                const w = getWeek(d);
+                if (w === currentWeek) {
+                    thisWeekSum += (entry.score || 0);
+                    thisWeekCount++;
+                } else if (w === currentWeek - 1) {
+                    lastWeekSum += (entry.score || 0);
+                    lastWeekCount++;
+                }
+            });
+
+            const twAvg = thisWeekCount ? Math.round(thisWeekSum / thisWeekCount) : 0;
+            const lwAvg = lastWeekCount ? Math.round(lastWeekSum / lastWeekCount) : 0;
+
+            document.getElementById('thisWeekAvg').innerText = `${twAvg}%`;
+            document.getElementById('lastWeekAvg').innerText = `${lwAvg}%`;
+            
+            // Color coding
+            const colorize = (el, val) => el.style.color = val >= 80 ? 'var(--success)' : (val >= 50 ? 'var(--warning)' : 'var(--danger)');
+            colorize(document.getElementById('thisWeekAvg'), twAvg);
+            colorize(document.getElementById('lastWeekAvg'), lwAvg);
         }
 
         // --- RENDERING ---
@@ -732,11 +929,41 @@
             updateHistoryTable(filteredDates, allHistory);
             
             updateMonthlyStats(allHistory); 
-            updateYearlyStats(allHistory);  
+            // Yearly Heatmap
+            renderHeatmap(allHistory);
+            
             updateMonthlyCounts(allHistory); 
+            calculateWeeklyStats(allHistory);
 
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             document.getElementById('historyLogTitle').innerText = `History Log (${monthNames[viewMonth]} ${viewYear})`;
+        }
+
+        function renderHeatmap(allHistory) {
+            const container = document.getElementById('yearHeatmap');
+            container.innerHTML = '';
+            
+            // Generate full year grid (approx 53 weeks x 7 days)
+            // Ideally we iterate by day from Jan 1 to Dec 31
+            const start = new Date(viewYear, 0, 1);
+            const end = new Date(viewYear, 11, 31);
+            
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                const score = allHistory[dateStr] ? allHistory[dateStr].score : 0;
+                
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell';
+                cell.title = `${dateStr}: ${score}%`;
+                
+                if (score > 0) {
+                    if (score >= 80) cell.classList.add('hm-l4');
+                    else if (score >= 60) cell.classList.add('hm-l3');
+                    else if (score >= 40) cell.classList.add('hm-l2');
+                    else cell.classList.add('hm-l1');
+                }
+                container.appendChild(cell);
+            }
         }
 
         function updateMonthlyCounts(allHistory) {
@@ -748,12 +975,12 @@
             });
 
             let habitCounts = {};
-            habitsList.forEach(h => habitCounts[h] = 0);
+            habitKeys.forEach(h => habitCounts[h] = 0);
             let studyCounts = { red: 0, yellow: 0, green: 0, total: 0 };
 
             monthDates.forEach(date => {
                 const day = allHistory[date];
-                habitsList.forEach(h => { if (day[h]) habitCounts[h]++; });
+                habitKeys.forEach(h => { if (day[h]) habitCounts[h]++; });
                 if (day.studyMode && day.studyMode !== 'none') {
                     studyCounts.total++;
                     if (studyCounts[day.studyMode] !== undefined) {
@@ -766,19 +993,21 @@
                 const hKey = btn.getAttribute('data-habit');
                 const count = habitCounts[hKey];
                 const pct = Math.round((count / daysInMonth) * 100);
-                const label = habitLabels[hKey];
+                const label = habitLabels[hKey]; // Use custom label
                 
                 const isActive = currentData[hKey];
 
                 btn.innerHTML = `${label}<span class="btn-count">${count} days (${pct}%)</span>`;
 
                 let colorFilled, colorEmpty;
+                const isDark = document.body.classList.contains('dark-mode');
+                
                 if (isActive) {
-                    colorFilled = '#bbf7d0'; 
-                    colorEmpty = '#e8f8f0';  
+                    colorFilled = isDark ? '#145e32' : '#bbf7d0'; 
+                    colorEmpty = isDark ? '#1e1e1e' : '#e8f8f0';  
                 } else {
-                    colorFilled = '#dcfce7'; 
-                    colorEmpty = '#ffffff';  
+                    colorFilled = isDark ? '#0e4429' : '#dcfce7'; 
+                    colorEmpty = isDark ? '#2d2d2d' : '#ffffff';  
                 }
 
                 btn.style.background = `linear-gradient(90deg, ${colorFilled} ${pct}%, ${colorEmpty} ${pct}%)`;
@@ -792,16 +1021,17 @@
                 const btnTitle = mode.toUpperCase();
                 const isSelected = (currentData.studyMode === mode);
 
+                // Simple background calc for modes
                 let colorFilled, colorEmpty;
-                if (mode === 'red') {
-                    colorFilled = isSelected ? '#fecaca' : '#fee2e2'; 
-                    colorEmpty = isSelected ? '#fff1f2' : '#ffffff';
-                } else if (mode === 'yellow') {
-                    colorFilled = isSelected ? '#fde047' : '#fef9c3'; 
-                    colorEmpty = isSelected ? '#fefce8' : '#ffffff';
-                } else { 
-                    colorFilled = isSelected ? '#bbf7d0' : '#dcfce7'; 
-                    colorEmpty = isSelected ? '#f0fdf4' : '#ffffff';
+                const isDark = document.body.classList.contains('dark-mode');
+                // Simplifying gradient logic for modes to keep code short
+                colorEmpty = isDark ? '#2d2d2d' : '#fff';
+                colorFilled = isDark ? '#444' : '#eee';
+                
+                if(isSelected) {
+                     if(mode==='red') colorFilled = isDark ? '#5c1e1e' : '#fadbd8';
+                     if(mode==='yellow') colorFilled = isDark ? '#5c5c1e' : '#fcf3cf';
+                     if(mode==='green') colorFilled = isDark ? '#1e5c30' : '#d5f5e3';
                 }
 
                 btn.innerHTML = `${btnTitle}<br><small>${label} • ${count}d (${pct}%)</small>`;
@@ -823,7 +1053,7 @@
             const valEl = document.getElementById('monthlyScoreValue');
             if (monthDates.length === 0) {
                 valEl.innerText = "--";
-                valEl.style.color = "#ccc";
+                valEl.style.color = "var(--subtitle-color)";
                 return;
             }
 
@@ -837,55 +1067,13 @@
             else valEl.style.color = 'var(--danger)';
         }
 
-        function updateYearlyStats(allHistory) {
-            const container = document.getElementById('yearlyStatsGrid');
-            container.innerHTML = '';
-
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-            monthNames.forEach((month, index) => {
-                const monthDates = Object.keys(allHistory).filter(dateStr => {
-                    const [y, m, dNum] = dateStr.split('-').map(Number);
-                    return y === viewYear && (m - 1) === index;
-                });
-
-                let displayScore = "-";
-                let colorStyle = "#ccc";
-                let boxClass = "month-box";
-                
-                if (index === viewMonth) {
-                    boxClass += " selected-month";
-                }
-
-                if (monthDates.length > 0) {
-                    const total = monthDates.reduce((sum, d) => sum + (allHistory[d].score || 0), 0);
-                    const daysInThisMonth = new Date(viewYear, index + 1, 0).getDate();
-                    const avg = Math.round(total / daysInThisMonth);
-                    
-                    displayScore = avg + "%";
-                    boxClass += " has-data";
-                    
-                    if (avg >= 80) colorStyle = 'var(--success)';
-                    else if (avg >= 50) colorStyle = 'var(--warning)';
-                    else colorStyle = 'var(--danger)';
-                }
-
-                container.innerHTML += `
-                    <div class="${boxClass}" onclick="changeViewMonth(${index})">
-                        <div class="month-name">${month}</div>
-                        <div class="month-score" style="color: ${colorStyle}">${displayScore}</div>
-                    </div>
-                `;
-            });
-        }
-
         function updateHistoryTable(dates, allHistory) {
             const tbody = document.querySelector('#historyTable tbody');
             tbody.innerHTML = '';
             
             [...dates].reverse().forEach(date => {
                 const day = allHistory[date];
-                if (day.score === 0 && !day.studyMode && habitsList.every(h => !day[h])) return;
+                if (day.score === 0 && !day.studyMode && habitKeys.every(h => !day[h]) && !day.journal) return;
 
                 let scoreColor = '#e74c3c';
                 if(day.score >= 50) scoreColor = '#f1c40f';
@@ -893,13 +1081,16 @@
 
                 const [y, m, d] = date.split('-');
                 const formattedDate = `${d}-${m}-${y.slice(2)}`;
+                
+                // Show small journal icon if note exists
+                const journalIcon = day.journal ? ' <span title="'+day.journal+'">📝</span>' : '';
 
                 const row = `
                     <tr>
-                        <td><strong>${formattedDate}</strong></td>
+                        <td><strong>${formattedDate}</strong>${journalIcon}</td>
                         <td><span class="score-pill" style="background:${scoreColor}">${day.score}%</span></td>
                         <td>${day.studyMode && day.studyMode !== 'none' ? day.studyMode.toUpperCase() : '-'}</td>
-                        <td style="font-size:10px; color:#666;">
+                        <td style="font-size:10px; color:var(--subtitle-color);">
                             ${day.wakeUp ? '🌅 ' : ''}
                             ${day.exercise ? '💪 ' : ''}
                             ${day.meditation ? '🧘 ' : ''}
@@ -919,11 +1110,14 @@
         function updateChart(dates, allHistory) {
             const ctx = document.getElementById('progressChart').getContext('2d');
             const scores = dates.map(d => allHistory[d].score || 0);
+            const isDark = document.body.classList.contains('dark-mode');
+            const color = isDark ? '#3498db' : '#3498db';
+            const gridColor = isDark ? '#444' : '#eee';
 
             if(myChart) myChart.destroy();
 
             let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(52, 152, 219, 0.5)'); 
+            gradient.addColorStop(0, isDark ? 'rgba(52, 152, 219, 0.5)' : 'rgba(52, 152, 219, 0.5)'); 
             gradient.addColorStop(1, 'rgba(52, 152, 219, 0.0)'); 
 
             myChart = new Chart(ctx, {
@@ -931,18 +1125,14 @@
                 data: {
                     labels: dates.map(d => d.slice(5)), 
                     datasets: [{
-                        label: 'Mastery Score',
+                        label: 'Score',
                         data: scores,
-                        borderColor: '#3498db',
+                        borderColor: color,
                         backgroundColor: gradient,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#3498db',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
+                        borderWidth: 2,
+                        pointRadius: 2,
                         fill: true,
-                        tension: 0.4 
+                        tension: 0.3 
                     }]
                 },
                 options: {
@@ -952,122 +1142,75 @@
                         y: {
                             beginAtZero: true,
                             max: 100,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)',
-                                borderDash: [5, 5]
-                            },
-                            ticks: { font: { family: "'Segoe UI', sans-serif" } }
+                            grid: { color: gridColor, borderDash: [5, 5] },
+                            ticks: { color: isDark ? '#aaa' : '#666' }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: {
-                                font: { family: "'Segoe UI', sans-serif" },
-                                maxTicksLimit: 10 
-                            }
+                            ticks: { color: isDark ? '#aaa' : '#666', maxTicksLimit: 8 }
                         }
                     },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(44, 62, 80, 0.9)',
-                            padding: 12,
-                            cornerRadius: 8,
-                            titleFont: { size: 14, family: "'Segoe UI', sans-serif" },
-                            bodyFont: { size: 14, family: "'Segoe UI', sans-serif" },
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return `Score: ${context.parsed.y}%`;
-                                }
-                            }
-                        }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
         function exportToExcel() {
             if (typeof XLSX === 'undefined') {
-                showModal('Excel library is loading. Please try again in a moment.', 'alert');
+                showModal('Excel library is loading...', 'alert');
                 return;
             }
-
             const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
             const dates = Object.keys(allHistory).sort();
+            if (dates.length === 0) { showModal("No data to export!", 'alert'); return; }
 
-            if (dates.length === 0) {
-                showModal("No data to export!", 'alert');
-                return;
-            }
+            const data = dates.map(date => {
+                const entry = allHistory[date];
+                return {
+                    "Date": date,
+                    "Score": entry.score,
+                    "Journal": entry.journal || "",
+                    "Study Mode": entry.studyMode,
+                    "Wake Up": entry.wakeUp ? 'Yes' : '',
+                    "Exercise": entry.exercise ? 'Yes' : '',
+                    "Meditation": entry.meditation ? 'Yes' : '',
+                    "Prayer": entry.prayer ? 'Yes' : '',
+                    "Walk": entry.walk ? 'Yes' : '',
+                    "Reading": entry.reading ? 'Yes' : '',
+                    "Skills": entry.skills ? 'Yes' : '',
+                    "No D": entry.noD ? 'Yes' : '',
+                    "No P": entry.noP ? 'Yes' : ''
+                };
+            });
 
-            try {
-                const data = dates.map(date => {
-                    const entry = allHistory[date];
-                    return {
-                        "Date": date,
-                        "Score": entry.score,
-                        "Study Mode": entry.studyMode,
-                        "Wake Up": entry.wakeUp ? 'Yes' : '',
-                        "Exercise": entry.exercise ? 'Yes' : '',
-                        "Meditation": entry.meditation ? 'Yes' : '',
-                        "Prayer": entry.prayer ? 'Yes' : '',
-                        "Walk": entry.walk ? 'Yes' : '',
-                        "Reading": entry.reading ? 'Yes' : '',
-                        "Skills": entry.skills ? 'Yes' : '',
-                        "No D": entry.noD ? 'Yes' : '',
-                        "No P": entry.noP ? 'Yes' : ''
-                    };
-                });
-
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(data);
-                const wscols = [{wch:12}, {wch:8}, {wch:10}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}];
-                ws['!cols'] = wscols;
-
-                XLSX.utils.book_append_sheet(wb, ws, "Mastery Data");
-                XLSX.writeFile(wb, `Mastery_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
-            } catch (e) {
-                showModal("Export failed. Please try opening this file in a real browser.", 'alert');
-            }
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, "Mastery Data");
+            XLSX.writeFile(wb, `Mastery_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
         function importFromExcel(input) {
             const file = input.files[0];
             if (!file) return;
-
-            if (typeof XLSX === 'undefined') {
-                showModal('Excel library not loaded yet. Please wait.', 'alert');
-                return;
-            }
+            if (typeof XLSX === 'undefined') return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {raw: false}); // raw:false keeps dates as strings
+                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {raw: false});
 
-                    if (jsonData.length === 0) {
-                        showModal("No data found in file.", 'alert');
-                        return;
-                    }
-
-                    // Process Data
                     const restoredHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
                     let count = 0;
 
                     jsonData.forEach(row => {
-                        // Map back to internal format
-                        // Row keys match the Export headers: "Date", "Score", "Study Mode", etc.
                         const date = row["Date"];
                         if (!date) return;
-
-                        const entry = {
+                        restoredHistory[date] = {
                             score: parseInt(row["Score"]) || 0,
+                            journal: row["Journal"] || "",
                             studyMode: row["Study Mode"] || 'none',
-                            // Habits
                             wakeUp: row["Wake Up"] === 'Yes',
                             exercise: row["Exercise"] === 'Yes',
                             meditation: row["Meditation"] === 'Yes',
@@ -1078,73 +1221,61 @@
                             noD: row["No D"] === 'Yes',
                             noP: row["No P"] === 'Yes'
                         };
-                        
-                        restoredHistory[date] = entry;
                         count++;
                     });
 
                     localStorage.setItem('masteryTracker_v2', JSON.stringify(restoredHistory));
-                    showModal(`Successfully restored ${count} days of history.`, 'alert');
-                    
-                    // Refresh View
+                    showModal(`Restored ${count} records.`, 'alert');
                     loadDateData();
-                    // Clear input so same file can be selected again if needed
                     input.value = '';
-
-                } catch (err) {
-                    console.error(err);
-                    showModal("Error parsing file. Make sure it is a valid Excel file exported from this app.", 'alert');
-                }
+                } catch (err) { showModal("Error parsing file.", 'alert'); }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function showModal(message, type = 'alert', onConfirm = null) {
+            const modal = document.getElementById('custom-modal');
+            const msgEl = document.getElementById('modal-message');
+            const cancelBtn = document.getElementById('modal-btn-cancel');
+            const confirmBtn = document.getElementById('modal-btn-confirm');
+
+            msgEl.textContent = message;
+            confirmBtn.textContent = "OK";
+            const newConfirm = confirmBtn.cloneNode(true);
+            const newCancel = cancelBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+            cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+            newCancel.onclick = () => modal.classList.remove('active');
+            if (type === 'confirm') {
+                cancelBtn.style.display = 'block';
+                newConfirm.onclick = () => { modal.classList.remove('active'); if(onConfirm) onConfirm(); };
+            } else {
+                cancelBtn.style.display = 'none';
+                newConfirm.onclick = () => modal.classList.remove('active');
+            }
+            modal.classList.add('active');
         }
 
         function clearPreviousYears() {
             const allHistory = JSON.parse(localStorage.getItem('masteryTracker_v2')) || {};
             const currentYear = new Date().getFullYear();
-            
-            const keysToDelete = Object.keys(allHistory).filter(dateStr => {
-                const year = parseInt(dateStr.split('-')[0]);
-                return year < currentYear;
-            });
+            const keysToDelete = Object.keys(allHistory).filter(dateStr => parseInt(dateStr.split('-')[0]) < currentYear);
 
-            if (keysToDelete.length === 0) {
-                showModal(`No data found from years before ${currentYear}.`, 'alert');
-                return;
-            }
+            if (keysToDelete.length === 0) { showModal(`No older data found.`, 'alert'); return; }
 
-            // First Confirmation
-            showModal(`Are you sure you want to delete ${keysToDelete.length} records from before ${currentYear}?`, 'confirm', () => {
-                // Second Confirmation (Double Check)
-                setTimeout(() => {
-                    showModal("⚠️ FINAL WARNING: This action cannot be undone. Are you absolutely sure?", 'confirm', () => {
-                        keysToDelete.forEach(key => delete allHistory[key]);
-                        localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
-                        showModal("Previous years' data has been cleared.", 'alert');
-                        loadDateData(); 
-                    });
-                }, 200);
+            showModal(`Delete ${keysToDelete.length} old records?`, 'confirm', () => {
+                keysToDelete.forEach(k => delete allHistory[k]);
+                localStorage.setItem('masteryTracker_v2', JSON.stringify(allHistory));
+                loadDateData();
             });
         }
 
         function clearData() {
-            // First Confirmation
-            showModal("Permanently delete ALL history (including this year)?", 'confirm', () => {
-                // Second Confirmation (Double Check)
-                setTimeout(() => {
-                    showModal("⚠️ FINAL WARNING: This will wipe everything permanently. Continue?", 'confirm', () => {
-                        localStorage.removeItem('masteryTracker_v2');
-                        currentData = {};
-                        habitsList.forEach(h => currentData[h] = false);
-                        currentData['studyMode'] = null;
-                        currentData['score'] = 0;
-                        updateUIState();
-                        renderHistoryAndGraph(); 
-                        document.getElementById('monthlyScoreValue').innerText = "--";
-                        document.getElementById('monthlyScoreValue').style.color = "#ccc";
-                        showModal("All data has been reset.", 'alert');
-                    });
-                }, 200);
+            showModal("Reset EVERYTHING? This cannot be undone.", 'confirm', () => {
+                localStorage.removeItem('masteryTracker_v2');
+                localStorage.removeItem('mastery_labels'); // Also reset labels
+                location.reload(); 
             });
         }
     </script>
