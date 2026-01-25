@@ -551,13 +551,13 @@
             
             <div class="mode-container">
                 <button class="mode-btn red" onclick="setStudyMode('red')" id="btn-mode-red">
-                    RED<br><small>GK Only</small>
+                    RED<br><small>15-30 Min</small>
                 </button>
                 <button class="mode-btn yellow" onclick="setStudyMode('yellow')" id="btn-mode-yellow">
-                    YELLOW<br><small>Concept</small>
+                    YELLOW<br><small>30-60 Min</small>
                 </button>
                 <button class="mode-btn green" onclick="setStudyMode('green')" id="btn-mode-green">
-                    GREEN<br><small>Deep Work</small>
+                    GREEN<br><small>More Than 1 Hr</small>
                 </button>
             </div>
         </div>
@@ -717,9 +717,9 @@
         let habitLabels = JSON.parse(localStorage.getItem('mastery_labels')) || defaultLabels;
 
         const studyLabels = {
-            'red': 'GK Only',
-            'yellow': 'Concept',
-            'green': 'Deep Work'
+            'red': '15-30 Min',
+            'yellow': '30-60 Min',
+            'green': 'More Than 1 Hr'
         };
 
         let currentData = {};
@@ -1544,3 +1544,4 @@
     </script>
 </body>
 </html>
+
